@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f0f2f5; padding: 20px; font-family: 'Segoe UI', sans-serif; }
+    .card { max-width: 650px; margin: 0 auto; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); background: #fff; }
+    .page-section { display: none; } 
+    .active-page { display: block; } 
+    .menu-btn { height: 100px; font-size: 18px; font-weight: bold; border-radius: 12px; transition: 0.3s; }
+    .menu-btn:hover { transform: translateY(-5px); box-shadow: 0 6px 15px rgba(13, 110, 253, 0.3); }
+    .btn-back { font-weight: 500; text-decoration: none; cursor: pointer; color: #6c757d; margin-bottom: 20px; display: inline-block;}
+    .btn-back:hover { color: #0d6efd; }
+    .sub-section { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #0d6efd;}
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    
+    <!-- HALAMAN MENU -->
+    <div id="pageMenu" class="page-section active-page">
+      <h3 class="text-center text-primary mb-4">Portal Pengumpulan PKL</h3>
+      <p class="text-center text-muted mb-4">Pilih jenis file yang ingin dikumpulkan:</p>
+      <div class="d-grid gap-3">
+        <button class="btn btn-primary menu-btn" onclick="showPage('pageNaskah')">
+          📄 Pengumpulan Naskah Laporan
+        </button>
+        <button class="btn btn-success menu-btn" onclick="showPage('pagePresentasi')">
+          📊 Pengumpulan Slide Presentasi
+        </button>
+      </div>
+    </div>
+
+    <!-- HALAMAN FORM NASKAH -->
+    <div id="pageNaskah" class="page-section">
+      <div class="btn-back" onclick="showPage('pageMenu')">← Kembali ke Menu</div>
+      <h4 class="text-primary mb-3">Upload Naskah Laporan</h4>
+      <form id="formNaskah" onsubmit="submitNaskah(event)">
+        
+        <div class="sub-section">
+          <h6 class="fw-bold text-secondary">Data Siswa 1</h6>
+          <div class="mb-2">
+            <label class="form-label">Nama Siswa 1 <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="n_nama1" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">NISN Siswa 1 <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" id="n_nisn1" required>
+          </div>
+        </div>
+
+        <div class="sub-section border-secondary">
+          <h6 class="fw-bold text-secondary">Data Siswa 2 (Jika Berkelompok)</h6>
+          <div class="mb-2">
+            <label class="form-label">Nama Siswa 2 <span class="text-muted">(Kosongkan jika individu)</span></label>
+            <input type="text" class="form-control" id="n_nama2">
+          </div>
+          <div class="mb-2">
+            <label class="form-label">NISN Siswa 2 <span class="text-muted">(Kosongkan jika individu)</span></label>
+            <input type="number" class="form-control" id="n_nisn2">
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Kelas <span class="text-danger">*</span></label>
+          <select class="form-select" id="n_kelas" required>
+            <option value="">Pilih Kelas...</option>
+            <option value="12 DKV 1">12 DKV 1</option>
+            <option value="12 DKV 2">12 DKV 2</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Nama Tempat PKL <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="n_tempat" placeholder="Contoh: PT. Maju Jaya" required>
+        </div>
+        
+        <div class="mb-3 mt-4">
+          <label class="form-label fw-bold">1. Upload File DOCX <span class="text-danger">*</span></label>
+          <input type="file" class="form-control" id="n_file_docx" accept=".doc, .docx" required>
+          <div class="form-text text-danger" id="n_error_docx"></div>
+        </div>
+        <div class="mb-4">
+          <!-- HAPUS REQUIRED DAN UBAH LABEL -->
+          <label class="form-label fw-bold">2. Upload File PDF <span class="text-muted">(Opsional jika ada)</span></label>
+          <input type="file" class="form-control" id="n_file_pdf" accept=".pdf">
+          <div class="form-text text-danger" id="n_error_pdf"></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100" id="btnSubmitNaskah">Kirim Naskah Laporan</button>
+        <div id="statusNaskah" class="mt-3 text-center fw-bold"></div>
+      </form>
+    </div>
+
+    <!-- HALAMAN FORM PRESENTASI -->
+    <div id="pagePresentasi" class="page-section">
+      <div class="btn-back" onclick="showPage('pageMenu')">← Kembali ke Menu</div>
+      <h4 class="text-success mb-3">Upload Slide Presentasi</h4>
+      <form id="formPresentasi" onsubmit="submitPresentasi(event)">
+        
+        <div class="mb-3">
+          <label class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="p_nama" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">NISN <span class="text-danger">*</span></label>
+          <input type="number" class="form-control" id="p_nisn" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Kelas <span class="text-danger">*</span></label>
+          <select class="form-select" id="p_kelas" required>
+            <option value="">Pilih Kelas...</option>
+            <option value="12 DKV 1">12 DKV 1</option>
+            <option value="12 DKV 2">12 DKV 2</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Nama Tempat PKL <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="p_tempat" placeholder="Contoh: Percetakan Abadi" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Upload File Presentasi (PDF/PPTX)</label>
+          <input type="file" class="form-control" id="p_file" accept=".pdf, .ppt, .pptx">
+          <div class="form-text text-danger" id="p_file_error"></div>
+        </div>
+
+        <!-- Pertanyaan Interaktif Canva -->
+        <div class="mb-3 sub-section border-success">
+          <label class="form-label fw-bold">Apakah ada Link Canva untuk presentasi? jika ada pilih ya dan tuliskan linknya</label>
+          <div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="pakaiCanva" id="canvaYa" value="ya" onchange="toggleCanva()">
+              <label class="form-check-label" for="canvaYa">Ya, ada link</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="pakaiCanva" id="canvaTidak" value="tidak" checked onchange="toggleCanva()">
+              <label class="form-check-label" for="canvaTidak">Tidak</label>
+            </div>
+          </div>
+          
+          <div id="canvaContainer" class="mt-3" style="display: none;">
+            <label class="form-label text-success">Masukkan Link Canva Anda <span class="text-danger">*</span></label>
+            <input type="url" class="form-control border-success" id="p_canva" placeholder="https://canva.com/...">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-success w-100" id="btnSubmitPresentasi">Kirim Slide Presentasi</button>
+        <div id="statusPresentasi" class="mt-3 text-center fw-bold"></div>
+      </form>
+    </div>
+
+  </div>
+
+  <script>
+    function showPage(pageId) {
+      document.querySelectorAll('.page-section').forEach(page => page.classList.remove('active-page'));
+      document.getElementById(pageId).classList.add('active-page');
+      
+      document.getElementById('formNaskah').reset();
+      document.getElementById('formPresentasi').reset();
+      document.getElementById('statusNaskah').innerHTML = '';
+      document.getElementById('statusPresentasi').innerHTML = '';
+      toggleCanva(); // Reset toggle Canva
+    }
+
+    function toggleCanva() {
+      const isYa = document.getElementById('canvaYa').checked;
+      const canvaContainer = document.getElementById('canvaContainer');
+      const canvaInput = document.getElementById('p_canva');
+      
+      if (isYa) {
+        canvaContainer.style.display = 'block';
+        canvaInput.required = true;
+      } else {
+        canvaContainer.style.display = 'none';
+        canvaInput.required = false;
+        canvaInput.value = '';
+      }
+    }
+
+    // Ekstrak Base64 dan Ekstensi
+    function getFileContext(fileInputId) {
+      return new Promise((resolve, reject) => {
+        const file = document.getElementById(fileInputId).files[0];
+        if (!file) { resolve(null); return; } // Kembalikan null jika file kosong
+        
+        const ext = file.name.split('.').pop().toLowerCase();
+        const reader = new FileReader();
+        reader.onload = () => resolve({ base64: reader.result, ext: ext });
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function isValidFile(fileInputId, allowedExtensions, errorElId) {
+      const file = document.getElementById(fileInputId).files[0];
+      const errorEl = document.getElementById(errorElId);
+      errorEl.innerText = '';
+      if (!file) return true; // Lolos jika file dikosongkan (berguna untuk PDF yang opsional)
+
+      const fileExt = file.name.split('.').pop().toLowerCase();
+      if (!allowedExtensions.includes(fileExt)) {
+        errorEl.innerText = `Format salah! Harus format: ${allowedExtensions.join(', ')}`;
+        return false;
+      }
+      return true;
+    }
+
+    async function submitNaskah(e) {
+      e.preventDefault();
+      
+      if (!isValidFile('n_file_docx', ['doc', 'docx'], 'n_error_docx')) return;
+      if (!isValidFile('n_file_pdf', ['pdf'], 'n_error_pdf')) return; // Tetap divalidasi jika diisi, jika kosong akan lolos
+
+      const btn = document.getElementById('btnSubmitNaskah');
+      const status = document.getElementById('statusNaskah');
+      btn.disabled = true;
+      btn.innerText = 'Memproses Naskah... (Bisa butuh 1-2 menit)';
+      status.innerText = '';
+
+      try {
+        const docxData = await getFileContext('n_file_docx');
+        const pdfData = await getFileContext('n_file_pdf');
+
+        const formData = {
+          formType: 'Naskah',
+          nama1: document.getElementById('n_nama1').value,
+          nisn1: document.getElementById('n_nisn1').value,
+          nama2: document.getElementById('n_nama2').value,
+          nisn2: document.getElementById('n_nisn2').value,
+          kelas: document.getElementById('n_kelas').value,
+          tempatPKL: document.getElementById('n_tempat').value,
+          fileDocxBase64: docxData.base64,
+          extDocx: docxData.ext,
+          // Handle jika pdfData null (kosong)
+          filePdfBase64: pdfData ? pdfData.base64 : '',
+          extPdf: pdfData ? pdfData.ext : ''
+        };
+
+        google.script.run
+          .withSuccessHandler(res => {
+            if(res === 'Berhasil') {
+              status.innerHTML = '<span class="text-success">Naskah berhasil dikirim! Nama file telah disesuaikan otomatis.</span>';
+              document.getElementById('formNaskah').reset();
+            } else {
+              status.innerHTML = '<span class="text-danger">' + res + '</span>';
+            }
+            btn.disabled = false;
+            btn.innerText = 'Kirim Naskah Laporan';
+          })
+          .processForm(formData);
+      } catch (err) {
+        status.innerHTML = '<span class="text-danger">Gagal mengupload.</span>';
+        btn.disabled = false;
+        btn.innerText = 'Kirim Naskah Laporan';
+      }
+    }
+
+    async function submitPresentasi(e) {
+      e.preventDefault();
+
+      const isCanvaYa = document.getElementById('canvaYa').checked;
+      const fileInputLen = document.getElementById('p_file').files.length;
+      const errorEl = document.getElementById('p_file_error');
+      errorEl.innerText = '';
+
+      // Validasi: Jika tidak pakai canva, maka wajib upload file
+      if (!isCanvaYa && fileInputLen === 0) {
+        errorEl.innerText = 'Anda harus mengupload File jika tidak menggunakan Link Canva!';
+        return;
+      }
+      
+      if (fileInputLen > 0 && !isValidFile('p_file', ['pdf', 'ppt', 'pptx'], 'p_file_error')) return;
+
+      const btn = document.getElementById('btnSubmitPresentasi');
+      const status = document.getElementById('statusPresentasi');
+      btn.disabled = true;
+      btn.innerText = 'Memproses Presentasi...';
+      status.innerText = '';
+
+      try {
+        const slideData = await getFileContext('p_file');
+        
+        const formData = {
+          formType: 'Presentasi',
+          namaLengkap: document.getElementById('p_nama').value,
+          nisn: document.getElementById('p_nisn').value,
+          kelas: document.getElementById('p_kelas').value,
+          tempatPKL: document.getElementById('p_tempat').value, 
+          linkCanva: document.getElementById('p_canva').value,
+          fileSlideBase64: slideData ? slideData.base64 : '',
+          extSlide: slideData ? slideData.ext : ''
+        };
+
+        google.script.run
+          .withSuccessHandler(res => {
+            if(res === 'Berhasil') {
+              status.innerHTML = '<span class="text-success">Slide Presentasi berhasil dikirim!</span>';
+              document.getElementById('formPresentasi').reset();
+              toggleCanva();
+            } else {
+              status.innerHTML = '<span class="text-danger">' + res + '</span>';
+            }
+            btn.disabled = false;
+            btn.innerText = 'Kirim Slide Presentasi';
+          })
+          .processForm(formData);
+      } catch (err) {
+        status.innerHTML = '<span class="text-danger">Gagal mengupload.</span>';
+        btn.disabled = false;
+        btn.innerText = 'Kirim Slide Presentasi';
+      }
+    }
+  </script>
+</body>
+</html>
