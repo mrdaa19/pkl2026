@@ -8,9 +8,8 @@
   <style>
     body { background-color: #f0f2f5; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     .card-box { max-width: 650px; margin: 20px auto; padding: 30px; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); background: #fff; }
-    .dashboard-box { max-width: 1100px; margin: 20px auto; padding: 25px; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); background: #fff; }
+    .dashboard-box { max-width: 1180px; margin: 20px auto; padding: 25px; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); background: #fff; }
     .page-section { display: none; } 
-    .active-page { display: block; } 
     .menu-btn { height: 85px; font-size: 17px; font-weight: 600; border-radius: 12px; transition: 0.25s; }
     .menu-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
     .btn-back { font-weight: 600; cursor: pointer; color: #64748b; margin-bottom: 20px; display: inline-block; text-decoration: none; }
@@ -28,7 +27,7 @@
     <div class="card-box" id="mainContainer">
       
       <!-- 1. HALAMAN MENU UTAMA -->
-      <div id="pageMenu" class="page-section active-page">
+      <div id="pageMenu" class="page-section">
         <h3 class="text-center text-primary fw-bold mb-2">Portal Pengumpulan PKL</h3>
         <p class="text-center text-muted mb-4">Silakan pilih menu pengumpulan di bawah ini:</p>
         
@@ -39,7 +38,7 @@
           </button>
           <button class="btn btn-success menu-btn" onclick="showPage('pagePresentasi')">
             Pengumpulan Slide Presentasi<br>
-            <small class="fw-normal fs-6">(File PPT/PDF atau Link Canva — Wajib Individu)</small>
+            <small class="fw-normal fs-6">(File PPT/PDF - Individu)</small>
           </button>
         </div>
 
@@ -85,8 +84,9 @@
               <input type="text" class="form-control" id="n_nama1" required>
             </div>
             <div class="mb-1">
-              <label class="form-label">NISN Siswa 1 <span class="text-danger">*</span></label>
-              <input type="number" class="form-control" id="n_nisn1" required>
+              <label class="form-label">NIS Siswa 1 <span class="text-danger">*</span></label>
+              <input type="text" inputmode="numeric" maxlength="6" pattern="\d{5,6}" class="form-control" id="n_nisn1" placeholder="5 - 6 digit angka" oninput="filterNIS(this)" required>
+              <div class="form-text text-danger" id="n_error_nis1"></div>
             </div>
           </div>
 
@@ -97,8 +97,9 @@
               <input type="text" class="form-control" id="n_nama2">
             </div>
             <div class="mb-1">
-              <label class="form-label">NISN Siswa 2 <span class="text-muted small">(Kosongkan jika individu)</span></label>
-              <input type="number" class="form-control" id="n_nisn2">
+              <label class="form-label">NIS Siswa 2 <span class="text-muted small">(Kosongkan jika individu)</span></label>
+              <input type="text" inputmode="numeric" maxlength="6" pattern="\d{5,6}" class="form-control" id="n_nisn2" placeholder="5 - 6 digit angka" oninput="filterNIS(this)">
+              <div class="form-text text-danger" id="n_error_nis2"></div>
             </div>
           </div>
 
@@ -144,8 +145,9 @@
             <input type="text" class="form-control" id="p_nama" required>
           </div>
           <div class="mb-3">
-            <label class="form-label fw-semibold">NISN <span class="text-danger">*</span></label>
-            <input type="number" class="form-control" id="p_nisn" required>
+            <label class="form-label fw-semibold">NIS <span class="text-danger">*</span></label>
+            <input type="text" inputmode="numeric" maxlength="6" pattern="\d{5,6}" class="form-control" id="p_nisn" placeholder="5 - 6 digit angka" oninput="filterNIS(this)" required>
+            <div class="form-text text-danger" id="p_error_nis"></div>
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold">Kelas <span class="text-danger">*</span></label>
@@ -197,7 +199,7 @@
       <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <div>
           <h3 class="text-dark fw-bold m-0">Dashboard Rekap PKL 12 DKV</h3>
-          <small class="text-muted">Pantau dan unduh file laporan maupun slide presentasi siswa</small>
+          <small class="text-muted">Pantau, edit, hapus, dan unduh file laporan maupun slide presentasi siswa</small>
         </div>
         <div class="d-flex gap-2">
           <button class="btn btn-outline-primary btn-sm fw-bold" onclick="loadDashboardData()">Refresh Data</button>
@@ -224,7 +226,7 @@
       <!-- Filter Pencarian & Kelas -->
       <div class="row g-2 mb-3">
         <div class="col-md-8">
-          <input type="text" id="searchInput" class="form-control" placeholder="Cari nama siswa, NISN, atau tempat PKL..." onkeyup="filterTables()">
+          <input type="text" id="searchInput" class="form-control" placeholder="Cari nama siswa, NIS, atau tempat PKL..." onkeyup="filterTables()">
         </div>
         <div class="col-md-4">
           <select id="filterKelas" class="form-select" onchange="filterTables()">
@@ -253,16 +255,17 @@
               <tr>
                 <th>No</th>
                 <th>Waktu Upload</th>
-                <th>Siswa 1 (NISN)</th>
-                <th>Siswa 2 (NISN)</th>
+                <th>Siswa 1 (NIS)</th>
+                <th>Siswa 2 (NIS)</th>
                 <th>Kelas</th>
                 <th>Tempat PKL</th>
                 <th>File DOCX</th>
                 <th>File PDF</th>
+                <th>Aksi</th>
               </tr>
             </thead>
             <tbody id="tableBodyNaskah">
-              <tr><td colspan="8" class="text-center">Memuat data...</td></tr>
+              <tr><td colspan="9" class="text-center">Memuat data...</td></tr>
             </tbody>
           </table>
         </div>
@@ -277,15 +280,16 @@
                 <th>No</th>
                 <th>Waktu Upload</th>
                 <th>Nama Siswa</th>
-                <th>NISN</th>
+                <th>NIS</th>
                 <th>Kelas</th>
                 <th>Tempat PKL</th>
                 <th>File Slide</th>
                 <th>Link Canva</th>
+                <th>Aksi</th>
               </tr>
             </thead>
             <tbody id="tableBodyPresentasi">
-              <tr><td colspan="8" class="text-center">Memuat data...</td></tr>
+              <tr><td colspan="9" class="text-center">Memuat data...</td></tr>
             </tbody>
           </table>
         </div>
@@ -293,12 +297,162 @@
     </div>
   </div>
 
+  <!-- MODAL EDIT DATA NASKAH -->
+  <div class="modal fade" id="modalEditNaskah" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <form onsubmit="saveEditNaskah(event)">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title fw-bold">Edit Data Naskah Laporan</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="edit_n_rowIndex">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Nama Siswa 1 <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="edit_n_nama1" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">NIS Siswa 1 <span class="text-danger">*</span></label>
+                <input type="text" inputmode="numeric" maxlength="6" class="form-control" id="edit_n_nis1" oninput="filterNIS(this)" required>
+                <div class="form-text text-danger" id="edit_n_error_nis1"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Nama Siswa 2 <span class="text-muted small">(Kosongkan jika individu)</span></label>
+                <input type="text" class="form-control" id="edit_n_nama2">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">NIS Siswa 2 <span class="text-muted small">(Kosongkan jika individu)</span></label>
+                <input type="text" inputmode="numeric" maxlength="6" class="form-control" id="edit_n_nis2" oninput="filterNIS(this)">
+                <div class="form-text text-danger" id="edit_n_error_nis2"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Kelas <span class="text-danger">*</span></label>
+                <select class="form-select" id="edit_n_kelas" required>
+                  <option value="12 DKV 1">12 DKV 1</option>
+                  <option value="12 DKV 2">12 DKV 2</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Nama Tempat PKL <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="edit_n_tempat" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Ganti File DOCX <span class="text-muted small">(Biarkan kosong jika tidak diganti)</span></label>
+                <input type="file" class="form-control" id="edit_n_file_docx" accept=".doc,.docx">
+                <div class="form-text text-danger" id="edit_n_error_docx"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Ganti File PDF <span class="text-muted small">(Biarkan kosong jika tidak diganti)</span></label>
+                <input type="file" class="form-control" id="edit_n_file_pdf" accept=".pdf">
+                <div class="form-text text-danger" id="edit_n_error_pdf"></div>
+              </div>
+            </div>
+            <div id="statusEditNaskah" class="mt-3 text-center fw-bold"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary fw-bold" id="btnSaveEditNaskah">Simpan Perubahan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL EDIT DATA PRESENTASI -->
+  <div class="modal fade" id="modalEditPresentasi" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <form onsubmit="saveEditPresentasi(event)">
+          <div class="modal-header bg-success text-white">
+            <h5 class="modal-title fw-bold">Edit Data Slide Presentasi</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="edit_p_rowIndex">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Nama Lengkap <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="edit_p_nama" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">NIS <span class="text-danger">*</span></label>
+                <input type="text" inputmode="numeric" maxlength="6" class="form-control" id="edit_p_nis" oninput="filterNIS(this)" required>
+                <div class="form-text text-danger" id="edit_p_error_nis"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Kelas <span class="text-danger">*</span></label>
+                <select class="form-select" id="edit_p_kelas" required>
+                  <option value="12 DKV 1">12 DKV 1</option>
+                  <option value="12 DKV 2">12 DKV 2</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Nama Tempat PKL <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="edit_p_tempat" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Ganti File Slide (PPT/PDF) <span class="text-muted small">(Opsional)</span></label>
+                <input type="file" class="form-control" id="edit_p_file" accept=".pdf,.ppt,.pptx">
+                <div class="form-text text-danger" id="edit_p_error_file"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Link Canva <span class="text-muted small">(Isi '-' atau kosongkan jika tidak ada)</span></label>
+                <input type="text" class="form-control" id="edit_p_canva" placeholder="https://www.canva.com/...">
+              </div>
+            </div>
+            <div id="statusEditPresentasi" class="mt-3 text-center fw-bold"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-success fw-bold" id="btnSaveEditPresentasi">Simpan Perubahan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL KONFIRMASI HAPUS -->
+  <div class="modal fade" id="modalConfirmDelete" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title fw-bold">Konfirmasi Hapus Data</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="delete_rowIndex">
+          <p class="mb-2">Apakah Anda yakin ingin menghapus data berikut?</p>
+          <div class="p-3 bg-light rounded border mb-2">
+            <strong id="delete_infoText"></strong>
+          </div>
+          <small class="text-danger">Data di Spreadsheet dan file terkait di Google Drive akan dihapus permanen.</small>
+          <div id="statusDelete" class="mt-2 text-center fw-bold text-danger"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-danger fw-bold" id="btnConfirmDelete" onclick="executeDelete()">Ya, Hapus Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     const URL_API_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxraP6Pt3k6ObaZO2FHFyuWqN9ikS4LEvnHGO2AvYjTstHkX1h2pC5danncjZymUbx2bw/exec";
     
     let currentAdminPass = sessionStorage.getItem("pklAdminPass") || "";
     let rawNaskahData = [];
     let rawPresentasiData = [];
+
+    function filterNIS(input) {
+      input.value = input.value.replace(/[^0-9]/g, '').slice(0, 6);
+    }
+
+    function isValidNIS(value) {
+      return /^\d{5,6}$/.test(String(value).trim());
+    }
 
     async function sendDataToAPI(payload) {
       try {
@@ -320,16 +474,22 @@
       
       if (pageId === 'pageDashboard') {
         if (!currentAdminPass) {
-          showPage('pageLogin');
+          sessionStorage.setItem("pklActivePage", "pageLogin");
+          document.getElementById('pageDashboard').style.display = 'none';
+          document.getElementById('mainContainer').style.display = 'block';
+          document.getElementById('pageLogin').style.display = 'block';
           return;
         }
+        sessionStorage.setItem("pklActivePage", "pageDashboard");
         document.getElementById('mainContainer').style.display = 'none';
         document.getElementById('pageDashboard').style.display = 'block';
         loadDashboardData();
       } else {
+        sessionStorage.setItem("pklActivePage", pageId);
         document.getElementById('pageDashboard').style.display = 'none';
         document.getElementById('mainContainer').style.display = 'block';
-        document.getElementById(pageId).style.display = 'block';
+        const targetEl = document.getElementById(pageId) || document.getElementById('pageMenu');
+        targetEl.style.display = 'block';
       }
     }
 
@@ -379,6 +539,7 @@
     function logout() {
       currentAdminPass = "";
       sessionStorage.removeItem("pklAdminPass");
+      sessionStorage.removeItem("pklActiveTab");
       showPage('pageMenu');
     }
 
@@ -386,6 +547,7 @@
     // DASHBOARD & FILTER TABEL
     // ==========================================
     function switchTab(tabId) {
+      sessionStorage.setItem("pklActiveTab", tabId);
       document.getElementById('btnTabNaskah').classList.toggle('active', tabId === 'tabNaskah');
       document.getElementById('btnTabPresentasi').classList.toggle('active', tabId === 'tabPresentasi');
       document.getElementById('tabNaskah').style.display = (tabId === 'tabNaskah') ? 'block' : 'none';
@@ -401,8 +563,8 @@
       const tbNaskah = document.getElementById('tableBodyNaskah');
       const tbPresentasi = document.getElementById('tableBodyPresentasi');
       
-      tbNaskah.innerHTML = '<tr><td colspan="8" class="text-center py-4">Sedang mengambil data dari Google Sheets...</td></tr>';
-      tbPresentasi.innerHTML = '<tr><td colspan="8" class="text-center py-4">Sedang mengambil data dari Google Sheets...</td></tr>';
+      tbNaskah.innerHTML = '<tr><td colspan="9" class="text-center py-4">Sedang mengambil Data...</td></tr>';
+      tbPresentasi.innerHTML = '<tr><td colspan="9" class="text-center py-4">Sedang mengambil Data...</td></tr>';
 
       const response = await sendDataToAPI({ action: "getDashboard", password: currentAdminPass });
       
@@ -413,8 +575,8 @@
         document.getElementById('countPresentasi').innerText = rawPresentasiData.length + " Slide";
         filterTables();
       } else {
-        tbNaskah.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Gagal memuat data: ${response.message}</td></tr>`;
-        tbPresentasi.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Gagal memuat data: ${response.message}</td></tr>`;
+        tbNaskah.innerHTML = `<tr><td colspan="9" class="text-center text-danger">Gagal memuat data: ${response.message}</td></tr>`;
+        tbPresentasi.innerHTML = `<tr><td colspan="9" class="text-center text-danger">Gagal memuat data: ${response.message}</td></tr>`;
       }
     }
 
@@ -430,17 +592,21 @@
 
       const tbNaskah = document.getElementById('tableBodyNaskah');
       tbNaskah.innerHTML = filteredNaskah.length === 0 
-        ? '<tr><td colspan="8" class="text-center text-muted py-3">Tidak ada data naskah yang sesuai.</td></tr>'
+        ? '<tr><td colspan="9" class="text-center text-muted py-3">Tidak ada data naskah yang sesuai.</td></tr>'
         : filteredNaskah.map((d, idx) => `
           <tr>
             <td class="text-center">${idx + 1}</td>
             <td>${d.waktu}</td>
-            <td><strong>${d.nama1}</strong><br><small class="text-muted">NISN: ${d.nisn1}</small></td>
-            <td>${d.nama2 && d.nama2 !== '-' ? `<strong>${d.nama2}</strong><br><small class="text-muted">NISN: ${d.nisn2 || '-'}</small>` : '<span class="text-muted">Individu</span>'}</td>
+            <td><strong>${d.nama1}</strong><br><small class="text-muted">NIS: ${d.nisn1}</small></td>
+            <td>${d.nama2 && d.nama2 !== '-' ? `<strong>${d.nama2}</strong><br><small class="text-muted">NIS: ${d.nisn2 || '-'}</small>` : '<span class="text-muted">Individu</span>'}</td>
             <td class="text-center"><span class="badge bg-secondary">${d.kelas}</span></td>
             <td>${d.tempat}</td>
             <td class="text-center">${createActionBtn(d.docx, 'Unduh DOCX', 'btn-outline-primary')}</td>
             <td class="text-center">${createActionBtn(d.pdf, 'Unduh PDF', 'btn-outline-danger')}</td>
+            <td class="text-center text-nowrap">
+              <button class="btn btn-sm btn-warning fw-semibold me-1" onclick="openEditNaskah(${d.rowIndex})">Edit</button>
+              <button class="btn btn-sm btn-danger fw-semibold" onclick="openDeleteModal(${d.rowIndex}, 'Naskah')">Hapus</button>
+            </td>
           </tr>
         `).join('');
 
@@ -452,7 +618,7 @@
 
       const tbPresentasi = document.getElementById('tableBodyPresentasi');
       tbPresentasi.innerHTML = filteredPresentasi.length === 0 
-        ? '<tr><td colspan="8" class="text-center text-muted py-3">Tidak ada data presentasi yang sesuai.</td></tr>'
+        ? '<tr><td colspan="9" class="text-center text-muted py-3">Tidak ada data presentasi yang sesuai.</td></tr>'
         : filteredPresentasi.map((d, idx) => `
           <tr>
             <td class="text-center">${idx + 1}</td>
@@ -463,8 +629,223 @@
             <td>${d.tempat}</td>
             <td class="text-center">${createActionBtn(d.slide, 'Unduh Slide', 'btn-outline-success')}</td>
             <td class="text-center">${createActionBtn(d.canva, 'Buka Canva', 'btn-outline-info text-dark')}</td>
+            <td class="text-center text-nowrap">
+              <button class="btn btn-sm btn-warning fw-semibold me-1" onclick="openEditPresentasi(${d.rowIndex})">Edit</button>
+              <button class="btn btn-sm btn-danger fw-semibold" onclick="openDeleteModal(${d.rowIndex}, 'Presentasi')">Hapus</button>
+            </td>
           </tr>
         `).join('');
+    }
+
+    // ==========================================
+    // FITUR EDIT & HAPUS DI DASHBOARD
+    // ==========================================
+    function openEditNaskah(rowIndex) {
+      const item = rawNaskahData.find(x => x.rowIndex === rowIndex);
+      if (!item) return;
+
+      document.getElementById('edit_n_rowIndex').value = item.rowIndex;
+      document.getElementById('edit_n_nama1').value = item.nama1;
+      document.getElementById('edit_n_nis1').value = item.nisn1;
+      document.getElementById('edit_n_nama2').value = item.nama2 === '-' ? '' : item.nama2;
+      document.getElementById('edit_n_nis2').value = item.nisn2 === '-' ? '' : item.nisn2;
+      document.getElementById('edit_n_kelas').value = item.kelas;
+      document.getElementById('edit_n_tempat').value = item.tempat;
+      document.getElementById('edit_n_file_docx').value = '';
+      document.getElementById('edit_n_file_pdf').value = '';
+      document.getElementById('edit_n_error_nis1').innerText = '';
+      document.getElementById('edit_n_error_nis2').innerText = '';
+      document.getElementById('edit_n_error_docx').innerText = '';
+      document.getElementById('edit_n_error_pdf').innerText = '';
+      document.getElementById('statusEditNaskah').innerText = '';
+
+      const modal = new bootstrap.Modal(document.getElementById('modalEditNaskah'));
+      modal.show();
+    }
+
+    async function saveEditNaskah(e) {
+      e.preventDefault();
+      document.getElementById('edit_n_error_nis1').innerText = '';
+      document.getElementById('edit_n_error_nis2').innerText = '';
+
+      const nis1 = document.getElementById('edit_n_nis1').value.trim();
+      const nama2 = document.getElementById('edit_n_nama2').value.trim();
+      const nis2 = document.getElementById('edit_n_nis2').value.trim();
+
+      if (!isValidNIS(nis1)) {
+        document.getElementById('edit_n_error_nis1').innerText = 'NIS Siswa 1 harus 5 - 6 digit angka!';
+        return;
+      }
+      if (nama2 !== '' && !isValidNIS(nis2)) {
+        document.getElementById('edit_n_error_nis2').innerText = 'NIS Siswa 2 wajib diisi 5 - 6 digit angka!';
+        return;
+      }
+      if (nis2 !== '' && !isValidNIS(nis2)) {
+        document.getElementById('edit_n_error_nis2').innerText = 'NIS Siswa 2 harus 5 - 6 digit angka!';
+        return;
+      }
+
+      if (!isValidFile('edit_n_file_docx', ['doc', 'docx'], 'edit_n_error_docx')) return;
+      if (!isValidFile('edit_n_file_pdf', ['pdf'], 'edit_n_error_pdf')) return;
+
+      const btn = document.getElementById('btnSaveEditNaskah');
+      const status = document.getElementById('statusEditNaskah');
+      btn.disabled = true;
+      btn.innerText = 'Menyimpan...';
+      status.innerText = '';
+
+      try {
+        const docxData = await getFileContext('edit_n_file_docx');
+        const pdfData = await getFileContext('edit_n_file_pdf');
+
+        const payload = {
+          action: "editData",
+          password: currentAdminPass,
+          rowIndex: document.getElementById('edit_n_rowIndex').value,
+          data: {
+            formType: 'Naskah',
+            nama1: document.getElementById('edit_n_nama1').value,
+            nisn1: nis1,
+            nama2: nama2,
+            nisn2: nis2,
+            kelas: document.getElementById('edit_n_kelas').value,
+            tempatPKL: document.getElementById('edit_n_tempat').value,
+            fileDocxBase64: docxData ? docxData.base64 : '',
+            extDocx: docxData ? docxData.ext : '',
+            filePdfBase64: pdfData ? pdfData.base64 : '',
+            extPdf: pdfData ? pdfData.ext : ''
+          }
+        };
+
+        const res = await sendDataToAPI(payload);
+        if (res.status === 'Sukses') {
+          bootstrap.Modal.getInstance(document.getElementById('modalEditNaskah')).hide();
+          loadDashboardData();
+        } else {
+          status.innerHTML = `<span class="text-danger">Error: ${res.message}</span>`;
+        }
+      } catch (err) {
+        status.innerHTML = '<span class="text-danger">Gagal menyimpan perubahan.</span>';
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Simpan Perubahan';
+      }
+    }
+
+    function openEditPresentasi(rowIndex) {
+      const item = rawPresentasiData.find(x => x.rowIndex === rowIndex);
+      if (!item) return;
+
+      document.getElementById('edit_p_rowIndex').value = item.rowIndex;
+      document.getElementById('edit_p_nama').value = item.nama;
+      document.getElementById('edit_p_nis').value = item.nisn;
+      document.getElementById('edit_p_kelas').value = item.kelas;
+      document.getElementById('edit_p_tempat').value = item.tempat;
+      document.getElementById('edit_p_canva').value = item.canva === '-' ? '' : item.canva;
+      document.getElementById('edit_p_file').value = '';
+      document.getElementById('edit_p_error_nis').innerText = '';
+      document.getElementById('edit_p_error_file').innerText = '';
+      document.getElementById('statusEditPresentasi').innerText = '';
+
+      const modal = new bootstrap.Modal(document.getElementById('modalEditPresentasi'));
+      modal.show();
+    }
+
+    async function saveEditPresentasi(e) {
+      e.preventDefault();
+      document.getElementById('edit_p_error_nis').innerText = '';
+
+      const nis = document.getElementById('edit_p_nis').value.trim();
+      if (!isValidNIS(nis)) {
+        document.getElementById('edit_p_error_nis').innerText = 'NIS harus 5 - 6 digit angka!';
+        return;
+      }
+      if (!isValidFile('edit_p_file', ['pdf', 'ppt', 'pptx'], 'edit_p_error_file')) return;
+
+      const btn = document.getElementById('btnSaveEditPresentasi');
+      const status = document.getElementById('statusEditPresentasi');
+      btn.disabled = true;
+      btn.innerText = 'Menyimpan...';
+      status.innerText = '';
+
+      try {
+        const slideData = await getFileContext('edit_p_file');
+
+        const payload = {
+          action: "editData",
+          password: currentAdminPass,
+          rowIndex: document.getElementById('edit_p_rowIndex').value,
+          data: {
+            formType: 'Presentasi',
+            namaLengkap: document.getElementById('edit_p_nama').value,
+            nisn: nis,
+            kelas: document.getElementById('edit_p_kelas').value,
+            tempatPKL: document.getElementById('edit_p_tempat').value,
+            linkCanva: document.getElementById('edit_p_canva').value,
+            fileSlideBase64: slideData ? slideData.base64 : '',
+            extSlide: slideData ? slideData.ext : ''
+          }
+        };
+
+        const res = await sendDataToAPI(payload);
+        if (res.status === 'Sukses') {
+          bootstrap.Modal.getInstance(document.getElementById('modalEditPresentasi')).hide();
+          loadDashboardData();
+        } else {
+          status.innerHTML = `<span class="text-danger">Error: ${res.message}</span>`;
+        }
+      } catch (err) {
+        status.innerHTML = '<span class="text-danger">Gagal menyimpan perubahan.</span>';
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Simpan Perubahan';
+      }
+    }
+
+    function openDeleteModal(rowIndex, jenis) {
+      let info = '';
+      if (jenis === 'Naskah') {
+        const item = rawNaskahData.find(x => x.rowIndex === rowIndex);
+        if (!item) return;
+        info = `Naskah Laporan: ${item.nama1}${item.nama2 !== '-' ? ' & ' + item.nama2 : ''} (${item.kelas} - ${item.tempat})`;
+      } else {
+        const item = rawPresentasiData.find(x => x.rowIndex === rowIndex);
+        if (!item) return;
+        info = `Slide Presentasi: ${item.nama} (${item.kelas} - ${item.tempat})`;
+      }
+
+      document.getElementById('delete_rowIndex').value = rowIndex;
+      document.getElementById('delete_infoText').innerText = info;
+      document.getElementById('statusDelete').innerText = '';
+
+      const modal = new bootstrap.Modal(document.getElementById('modalConfirmDelete'));
+      modal.show();
+    }
+
+    async function executeDelete() {
+      const rowIndex = document.getElementById('delete_rowIndex').value;
+      const btn = document.getElementById('btnConfirmDelete');
+      const status = document.getElementById('statusDelete');
+
+      btn.disabled = true;
+      btn.innerText = 'Menghapus...';
+      status.innerText = '';
+
+      const res = await sendDataToAPI({
+        action: "deleteData",
+        password: currentAdminPass,
+        rowIndex: rowIndex
+      });
+
+      if (res.status === 'Sukses') {
+        bootstrap.Modal.getInstance(document.getElementById('modalConfirmDelete')).hide();
+        loadDashboardData();
+      } else {
+        status.innerText = `Gagal menghapus: ${res.message}`;
+      }
+
+      btn.disabled = false;
+      btn.innerText = 'Ya, Hapus Data';
     }
 
     // ==========================================
@@ -502,6 +883,29 @@
 
     async function submitNaskah(e) {
       e.preventDefault();
+      document.getElementById('n_error_nis1').innerText = '';
+      document.getElementById('n_error_nis2').innerText = '';
+
+      const nis1 = document.getElementById('n_nisn1').value.trim();
+      const nama2 = document.getElementById('n_nama2').value.trim();
+      const nis2 = document.getElementById('n_nisn2').value.trim();
+
+      if (!isValidNIS(nis1)) {
+        document.getElementById('n_error_nis1').innerText = 'NIS Siswa 1 harus terdiri dari 5 - 6 digit angka!';
+        document.getElementById('n_nisn1').focus();
+        return;
+      }
+      if (nama2 !== '' && nis2 === '') {
+        document.getElementById('n_error_nis2').innerText = 'NIS Siswa 2 wajib diisi (5 - 6 digit angka)!';
+        document.getElementById('n_nisn2').focus();
+        return;
+      }
+      if (nis2 !== '' && !isValidNIS(nis2)) {
+        document.getElementById('n_error_nis2').innerText = 'NIS Siswa 2 harus terdiri dari 5 - 6 digit angka!';
+        document.getElementById('n_nisn2').focus();
+        return;
+      }
+
       if (!isValidFile('n_file_docx', ['doc', 'docx'], 'n_error_docx')) return;
       if (!isValidFile('n_file_pdf', ['pdf'], 'n_error_pdf')) return;
 
@@ -520,9 +924,9 @@
           data: {
             formType: 'Naskah', 
             nama1: document.getElementById('n_nama1').value, 
-            nisn1: document.getElementById('n_nisn1').value,
-            nama2: document.getElementById('n_nama2').value, 
-            nisn2: document.getElementById('n_nisn2').value,
+            nisn1: nis1,
+            nama2: nama2, 
+            nisn2: nis2,
             kelas: document.getElementById('n_kelas').value, 
             tempatPKL: document.getElementById('n_tempat').value,
             fileDocxBase64: docxData.base64, 
@@ -549,6 +953,15 @@
 
     async function submitPresentasi(e) {
       e.preventDefault();
+      document.getElementById('p_error_nis').innerText = '';
+
+      const nis = document.getElementById('p_nisn').value.trim();
+      if (!isValidNIS(nis)) {
+        document.getElementById('p_error_nis').innerText = 'NIS harus terdiri dari 5 - 6 digit angka!';
+        document.getElementById('p_nisn').focus();
+        return;
+      }
+
       const isCanvaYa = document.getElementById('canvaYa').checked;
       const fileLen = document.getElementById('p_file').files.length;
       const errorEl = document.getElementById('p_file_error');
@@ -573,7 +986,7 @@
           data: {
             formType: 'Presentasi', 
             namaLengkap: document.getElementById('p_nama').value, 
-            nisn: document.getElementById('p_nisn').value,
+            nisn: nis,
             kelas: document.getElementById('p_kelas').value, 
             tempatPKL: document.getElementById('p_tempat').value, 
             linkCanva: document.getElementById('p_canva').value, 
@@ -597,6 +1010,14 @@
         btn.innerText = 'Kirim Slide Presentasi'; 
       }
     }
+
+    // ==========================================
+    // RESTORE HALAMAN AKTIF SAAT REFRESH
+    // ==========================================
+    const savedPage = sessionStorage.getItem("pklActivePage") || "pageMenu";
+    const savedTab = sessionStorage.getItem("pklActiveTab") || "tabNaskah";
+    switchTab(savedTab);
+    showPage(savedPage);
   </script>
 </body>
 </html>
