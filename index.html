@@ -3,133 +3,314 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-  <title>Portal PKL DKV</title>
+  <title>Portal Pengumpulan PKL 12 DKV</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body { background-color: #f0f2f5; padding: 20px; font-family: 'Segoe UI', sans-serif; }
-    .card { max-width: 650px; margin: 0 auto; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); background: #fff; }
-    .dashboard-card { max-width: 1000px; }
+    body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .navbar-custom { background-color: #1e293b; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+    .card-box { max-width: 650px; margin: 30px auto; padding: 30px; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); background: #fff; }
+    .dashboard-box { max-width: 1100px; margin: 30px auto; padding: 25px; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); background: #fff; }
     .page-section { display: none; } 
     .active-page { display: block; } 
-    .menu-btn { height: 80px; font-size: 16px; font-weight: bold; border-radius: 12px; transition: 0.3s; }
-    .menu-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0, 0.15); }
-    .btn-back { font-weight: 500; cursor: pointer; color: #6c757d; margin-bottom: 20px; display: inline-block;}
-    .sub-section { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #0d6efd;}
-    .table-responsive { max-height: 500px; overflow-y: auto; }
-    .file-link { font-size: 12px; }
+    .menu-btn { height: 85px; font-size: 17px; font-weight: 600; border-radius: 12px; transition: 0.25s; }
+    .menu-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+    .btn-back { font-weight: 600; cursor: pointer; color: #64748b; margin-bottom: 20px; display: inline-block; text-decoration: none; }
+    .btn-back:hover { color: #0d6efd; }
+    .sub-section { background-color: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #0d6efd; }
+    .table-responsive { max-height: 520px; overflow-y: auto; }
+    .stat-card { border-radius: 10px; padding: 15px; color: #fff; }
   </style>
 </head>
 <body>
 
-  <div class="card" id="mainContainer">
-    
-    <!-- HALAMAN MENU -->
-    <div id="pageMenu" class="page-section active-page">
-      <h3 class="text-center text-primary mb-4">Portal Pengumpulan PKL</h3>
-      <div class="d-grid gap-3">
-        <button class="btn btn-primary menu-btn" onclick="showPage('pageNaskah')">📄 Pengumpulan Naskah Laporan</button>
-        <button class="btn btn-success menu-btn" onclick="showPage('pagePresentasi')">📊 Pengumpulan Slide Presentasi</button>
+  <!-- NAVBAR ATAS -->
+  <nav class="navbar navbar-dark navbar-custom px-3 py-2">
+    <div class="container-fluid" style="max-width: 1100px;">
+      <a class="navbar-brand fw-bold" href="#" onclick="showPage('pageMenu'); return false;">
+        🎓 Portal PKL 12 DKV
+      </a>
+      <div class="d-flex gap-2">
+        <button id="navBtnLogin" class="btn btn-warning btn-sm fw-bold" onclick="showPage('pageLogin')">
+          🔐 Login Admin
+        </button>
+        <button id="navBtnDashboard" class="btn btn-info btn-sm fw-bold text-dark" style="display: none;" onclick="showPage('pageDashboard')">
+          📊 Dashboard
+        </button>
+        <button id="navBtnLogout" class="btn btn-danger btn-sm fw-bold" style="display: none;" onclick="logout()">
+          🚪 Keluar
+        </button>
       </div>
-      <hr class="my-4">
-      <div class="text-center">
-        <button class="btn btn-outline-dark btn-sm" onclick="showPage('pageLogin')">🔒 Login Admin Dashboard</button>
+    </div>
+  </nav>
+
+  <!-- CONTAINER UTAMA (MENU, LOGIN, & FORM SISWA) -->
+  <div class="container px-3">
+    <div class="card-box" id="mainContainer">
+      
+      <!-- 1. HALAMAN MENU UTAMA -->
+      <div id="pageMenu" class="page-section active-page">
+        <h3 class="text-center text-primary fw-bold mb-2">Portal Pengumpulan PKL</h3>
+        <p class="text-center text-muted mb-4">Silakan pilih menu pengumpulan di bawah ini:</p>
+        
+        <div class="d-grid gap-3">
+          <button class="btn btn-primary menu-btn" onclick="showPage('pageNaskah')">
+            📄 Pengumpulan Naskah Laporan<br>
+            <small class="fw-normal fs-6">(File DOCX & PDF — Individu / Kelompok)</small>
+          </button>
+          <button class="btn btn-success menu-btn" onclick="showPage('pagePresentasi')">
+            📊 Pengumpulan Slide Presentasi<br>
+            <small class="fw-normal fs-6">(File PPT/PDF atau Link Canva — Wajib Individu)</small>
+          </button>
+        </div>
+
+        <hr class="my-4">
+        <div class="p-3 bg-light rounded border text-center">
+          <p class="mb-2 text-muted small">Khusus Guru / Pembimbing PKL untuk memantau file masuk:</p>
+          <button class="btn btn-dark btn-sm px-4" onclick="showPage('pageLogin')">
+            🔐 Masuk ke Halaman Login Admin
+          </button>
+        </div>
       </div>
-    </div>
 
-    <!-- HALAMAN LOGIN ADMIN -->
-    <div id="pageLogin" class="page-section">
-      <div class="btn-back" onclick="showPage('pageMenu')">← Kembali ke Menu</div>
-      <h4 class="text-dark mb-4 text-center">Login Admin</h4>
-      <form onsubmit="prosesLogin(event)">
-        <div class="mb-3">
-          <label>Username</label>
-          <input type="text" id="loginUser" class="form-control" required>
+      <!-- 2. HALAMAN LOGIN ADMIN -->
+      <div id="pageLogin" class="page-section">
+        <div class="btn-back" onclick="showPage('pageMenu')">← Kembali ke Menu Utama</div>
+        <div class="text-center mb-4">
+          <h4 class="fw-bold text-dark">🔐 Login Admin Dashboard</h4>
+          <p class="text-muted small">Masukkan akun admin untuk melihat data dan file PKL siswa</p>
         </div>
-        <div class="mb-4">
-          <label>Password</label>
-          <input type="password" id="loginPass" class="form-control" required>
+        <form onsubmit="prosesLogin(event)">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Username</label>
+            <input type="text" id="loginUser" class="form-control" placeholder="Masukkan username..." required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Password</label>
+            <div class="input-group">
+              <input type="password" id="loginPass" class="form-control" placeholder="Masukkan password..." required>
+              <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">👁️</button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-dark w-100 py-2 fw-bold" id="btnLogin">Masuk ke Dashboard</button>
+          <div id="loginStatus" class="mt-3 text-center fw-bold text-danger"></div>
+        </form>
+      </div>
+
+      <!-- 3. HALAMAN FORM NASKAH LAPORAN -->
+      <div id="pageNaskah" class="page-section">
+        <div class="btn-back" onclick="showPage('pageMenu')">← Kembali ke Menu Utama</div>
+        <h4 class="text-primary fw-bold mb-3">📄 Upload Naskah Laporan</h4>
+        <form id="formNaskah" onsubmit="submitNaskah(event)">
+          
+          <div class="sub-section">
+            <h6 class="fw-bold text-primary">Data Siswa 1 (Wajib)</h6>
+            <div class="mb-2">
+              <label class="form-label">Nama Lengkap Siswa 1 <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="n_nama1" required>
+            </div>
+            <div class="mb-1">
+              <label class="form-label">NISN Siswa 1 <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" id="n_nisn1" required>
+            </div>
+          </div>
+
+          <div class="sub-section" style="border-left-color: #64748b;">
+            <h6 class="fw-bold text-secondary">Data Siswa 2 (Jika Berkelompok)</h6>
+            <div class="mb-2">
+              <label class="form-label">Nama Lengkap Siswa 2 <span class="text-muted small">(Kosongkan jika individu)</span></label>
+              <input type="text" class="form-control" id="n_nama2">
+            </div>
+            <div class="mb-1">
+              <label class="form-label">NISN Siswa 2 <span class="text-muted small">(Kosongkan jika individu)</span></label>
+              <input type="number" class="form-control" id="n_nisn2">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Kelas <span class="text-danger">*</span></label>
+            <select class="form-select" id="n_kelas" required>
+              <option value="">-- Pilih Kelas --</option>
+              <option value="12 DKV 1">12 DKV 1</option>
+              <option value="12 DKV 2">12 DKV 2</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nama Tempat PKL <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="n_tempat" placeholder="Contoh: PT. Maju Jaya" required>
+          </div>
+          
+          <div class="mb-3 mt-4">
+            <label class="form-label fw-bold">1. Upload File Naskah (DOC / DOCX) <span class="text-danger">*</span></label>
+            <input type="file" class="form-control" id="n_file_docx" accept=".doc,.docx" required>
+            <div class="form-text text-danger" id="n_error_docx"></div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">2. Upload File Naskah (PDF) <span class="text-muted fw-normal">(Opsional jika ada)</span></label>
+            <input type="file" class="form-control" id="n_file_pdf" accept=".pdf">
+            <div class="form-text text-danger" id="n_error_pdf"></div>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" id="btnSubmitNaskah">Kirim Naskah Laporan</button>
+          <div id="statusNaskah" class="mt-3 text-center fw-bold"></div>
+        </form>
+      </div>
+
+      <!-- 4. HALAMAN FORM SLIDE PRESENTASI -->
+      <div id="pagePresentasi" class="page-section">
+        <div class="btn-back" onclick="showPage('pageMenu')">← Kembali ke Menu Utama</div>
+        <h4 class="text-success fw-bold mb-3">📊 Upload Slide Presentasi</h4>
+        <form id="formPresentasi" onsubmit="submitPresentasi(event)">
+          
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nama Lengkap <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="p_nama" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">NISN <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" id="p_nisn" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Kelas <span class="text-danger">*</span></label>
+            <select class="form-select" id="p_kelas" required>
+              <option value="">-- Pilih Kelas --</option>
+              <option value="12 DKV 1">12 DKV 1</option>
+              <option value="12 DKV 2">12 DKV 2</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nama Tempat PKL <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="p_tempat" placeholder="Contoh: Percetakan Abadi" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">Upload File Presentasi (PPT / PPTX / PDF)</label>
+            <input type="file" class="form-control" id="p_file" accept=".pdf,.ppt,.pptx">
+            <div class="form-text text-danger" id="p_file_error"></div>
+          </div>
+
+          <div class="mb-4 sub-section" style="border-left-color: #198754;">
+            <label class="form-label fw-bold">Apakah Anda memiliki Link Canva untuk presentasi?</label>
+            <div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="pakaiCanva" id="canvaYa" value="ya" onchange="toggleCanva()">
+                <label class="form-check-label" for="canvaYa">Ya, ada link</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="pakaiCanva" id="canvaTidak" value="tidak" checked onchange="toggleCanva()">
+                <label class="form-check-label" for="canvaTidak">Tidak</label>
+              </div>
+            </div>
+            
+            <div id="canvaContainer" class="mt-3" style="display: none;">
+              <label class="form-label text-success fw-semibold">Masukkan Link Canva Anda <span class="text-danger">*</span></label>
+              <input type="url" class="form-control border-success" id="p_canva" placeholder="https://www.canva.com/design/...">
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-success w-100 py-2 fw-bold" id="btnSubmitPresentasi">Kirim Slide Presentasi</button>
+          <div id="statusPresentasi" class="mt-3 text-center fw-bold"></div>
+        </form>
+      </div>
+
+    </div>
+
+    <!-- 5. HALAMAN DASHBOARD ADMIN -->
+    <div class="dashboard-box page-section" id="pageDashboard">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+          <h3 class="text-dark fw-bold m-0">📊 Dashboard Rekap PKL 12 DKV</h3>
+          <small class="text-muted">Pantau dan unduh file laporan maupun slide presentasi siswa</small>
         </div>
-        <button type="submit" class="btn btn-dark w-100" id="btnLogin">Masuk</button>
-        <div id="loginStatus" class="mt-3 text-center fw-bold text-danger"></div>
-      </form>
-    </div>
-
-    <!-- HALAMAN FORM NASKAH -->
-    <div id="pageNaskah" class="page-section">
-      <div class="btn-back" onclick="showPage('pageMenu')">← Kembali ke Menu</div>
-      <h4 class="text-primary mb-3">Upload Naskah Laporan</h4>
-      <form id="formNaskah" onsubmit="submitNaskah(event)">
-        <div class="mb-2"><label>Nama Siswa 1</label><input type="text" class="form-control" id="n_nama1" required></div>
-        <div class="mb-3"><label>NISN Siswa 1</label><input type="number" class="form-control" id="n_nisn1" required></div>
-        <div class="mb-2"><label>Nama Siswa 2 (Jika Berkelompok)</label><input type="text" class="form-control" id="n_nama2"></div>
-        <div class="mb-3"><label>Kelas</label><select class="form-select" id="n_kelas" required><option value="12 DKV 1">12 DKV 1</option><option value="12 DKV 2">12 DKV 2</option></select></div>
-        <div class="mb-3"><label>Tempat PKL</label><input type="text" class="form-control" id="n_tempat" required></div>
-        <div class="mb-3"><label>Upload DOCX</label><input type="file" class="form-control" id="n_file_docx" accept=".doc, .docx" required></div>
-        <div class="mb-4"><label>Upload PDF (Opsional)</label><input type="file" class="form-control" id="n_file_pdf" accept=".pdf"></div>
-        <button type="submit" class="btn btn-primary w-100" id="btnSubmitNaskah">Kirim Naskah</button>
-        <div id="statusNaskah" class="mt-3 text-center fw-bold"></div>
-      </form>
-    </div>
-
-    <!-- HALAMAN FORM PRESENTASI -->
-    <div id="pagePresentasi" class="page-section">
-      <div class="btn-back" onclick="showPage('pageMenu')">← Kembali ke Menu</div>
-      <h4 class="text-success mb-3">Upload Slide Presentasi</h4>
-      <form id="formPresentasi" onsubmit="submitPresentasi(event)">
-        <div class="mb-2"><label>Nama Lengkap</label><input type="text" class="form-control" id="p_nama" required></div>
-        <div class="mb-2"><label>NISN</label><input type="number" class="form-control" id="p_nisn" required></div>
-        <div class="mb-2"><label>Kelas</label><select class="form-select" id="p_kelas" required><option value="12 DKV 1">12 DKV 1</option><option value="12 DKV 2">12 DKV 2</option></select></div>
-        <div class="mb-3"><label>Tempat PKL</label><input type="text" class="form-control" id="p_tempat" required></div>
-        <div class="mb-3"><label>Upload File (PDF/PPTX)</label><input type="file" class="form-control" id="p_file" accept=".pdf, .ppt, .pptx"></div>
-        <div class="mb-3 sub-section border-success">
-          <label class="form-label fw-bold">Pakai Link Canva?</label><br>
-          <input type="radio" name="pakaiCanva" id="canvaYa" onchange="toggleCanva()"> Ya 
-          <input type="radio" name="pakaiCanva" id="canvaTidak" checked onchange="toggleCanva()" class="ms-3"> Tidak
-          <input type="url" class="form-control mt-2" id="p_canva" placeholder="Link Canva..." style="display:none;">
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-primary btn-sm fw-bold" onclick="loadDashboardData()">🔄 Refresh Data</button>
+          <button class="btn btn-danger btn-sm fw-bold" onclick="logout()">🚪 Keluar</button>
         </div>
-        <button type="submit" class="btn btn-success w-100" id="btnSubmitPresentasi">Kirim Presentasi</button>
-        <div id="statusPresentasi" class="mt-3 text-center fw-bold"></div>
-      </form>
-    </div>
-  </div>
+      </div>
 
-  <!-- HALAMAN DASHBOARD (Container Dibuat Lebih Lebar) -->
-  <div class="card dashboard-card page-section" id="pageDashboard" style="margin: 0 auto; display: none;">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h3 class="text-dark m-0">Dashboard Admin</h3>
-      <button class="btn btn-danger btn-sm" onclick="logout()">Keluar</button>
-    </div>
-    
-    <ul class="nav nav-tabs mb-3" id="dashboardTabs">
-      <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tabNaskah" onclick="switchTab('tabNaskah', this)">Data Naskah</a></li>
-      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabPresentasi" onclick="switchTab('tabPresentasi', this)">Data Presentasi</a></li>
-    </ul>
+      <!-- Ringkasan Statistik -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <div class="stat-card bg-primary">
+            <div class="small">Total Naskah Laporan Masuk</div>
+            <h3 class="fw-bold m-0" id="countNaskah">0</h3>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="stat-card bg-success">
+            <div class="small">Total Slide Presentasi Masuk</div>
+            <h3 class="fw-bold m-0" id="countPresentasi">0</h3>
+          </div>
+        </div>
+      </div>
 
-    <div class="tab-content">
+      <!-- Filter Pencarian & Kelas -->
+      <div class="row g-2 mb-3">
+        <div class="col-md-8">
+          <input type="text" id="searchInput" class="form-control" placeholder="🔍 Cari nama siswa, NISN, atau tempat PKL..." onkeyup="filterTables()">
+        </div>
+        <div class="col-md-4">
+          <select id="filterKelas" class="form-select" onchange="filterTables()">
+            <option value="">Semua Kelas (12 DKV 1 & 2)</option>
+            <option value="12 DKV 1">12 DKV 1</option>
+            <option value="12 DKV 2">12 DKV 2</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Tab Navigasi Dashboard -->
+      <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+          <button class="nav-link active fw-bold" id="btnTabNaskah" onclick="switchTab('tabNaskah')">📄 Data Naskah Laporan</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link fw-bold" id="btnTabPresentasi" onclick="switchTab('tabPresentasi')">📊 Data Slide Presentasi</button>
+        </li>
+      </ul>
+
       <!-- Tabel Naskah -->
-      <div class="tab-pane fade show active" id="tabNaskah">
+      <div id="tabNaskah">
         <div class="table-responsive">
-          <table class="table table-bordered table-striped table-hover text-center align-middle" style="font-size: 14px;">
-            <thead class="table-primary">
+          <table class="table table-bordered table-striped table-hover align-middle" style="font-size: 14px;">
+            <thead class="table-primary text-center">
               <tr>
-                <th>Waktu</th><th>Nama Siswa 1</th><th>Nama Siswa 2</th><th>Kelas</th><th>Tempat PKL</th><th>File DOCX</th><th>File PDF</th>
+                <th>No</th>
+                <th>Waktu Upload</th>
+                <th>Siswa 1 (NISN)</th>
+                <th>Siswa 2 (NISN)</th>
+                <th>Kelas</th>
+                <th>Tempat PKL</th>
+                <th>File DOCX</th>
+                <th>File PDF</th>
               </tr>
             </thead>
-            <tbody id="tableBodyNaskah"><tr><td colspan="7">Memuat data...</td></tr></tbody>
+            <tbody id="tableBodyNaskah">
+              <tr><td colspan="8" class="text-center">Memuat data...</td></tr>
+            </tbody>
           </table>
         </div>
       </div>
 
       <!-- Tabel Presentasi -->
-      <div class="tab-pane fade" id="tabPresentasi" style="display: none;">
+      <div id="tabPresentasi" style="display: none;">
         <div class="table-responsive">
-          <table class="table table-bordered table-striped table-hover text-center align-middle" style="font-size: 14px;">
-            <thead class="table-success">
+          <table class="table table-bordered table-striped table-hover align-middle" style="font-size: 14px;">
+            <thead class="table-success text-center">
               <tr>
-                <th>Waktu</th><th>Nama Siswa</th><th>NISN</th><th>Kelas</th><th>Tempat PKL</th><th>File Slide</th><th>Link Canva</th>
+                <th>No</th>
+                <th>Waktu Upload</th>
+                <th>Nama Siswa</th>
+                <th>NISN</th>
+                <th>Kelas</th>
+                <th>Tempat PKL</th>
+                <th>File Slide</th>
+                <th>Link Canva</th>
               </tr>
             </thead>
-            <tbody id="tableBodyPresentasi"><tr><td colspan="7">Memuat data...</td></tr></tbody>
+            <tbody id="tableBodyPresentasi">
+              <tr><td colspan="8" class="text-center">Memuat data...</td></tr>
+            </tbody>
           </table>
         </div>
       </div>
@@ -138,118 +319,215 @@
 
   <script>
     // =====================================================================
-    // PASTE URL WEB APP GOOGLE SCRIPT VERSI BARU (BERAKHIRAN /exec)
+    // URL WEB APP GOOGLE APPS SCRIPT ANDA
     // =====================================================================
-    const URL_API_GOOGLE_SCRIPT = "MASUKKAN_LINK_GOOGLE_SCRIPT_ANDA_DI_SINI";
+    const URL_API_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxraP6Pt3k6ObaZO2FHFyuWqN9ikS4LEvnHGO2AvYjTstHkX1h2pC5danncjZymUbx2bw/exec";
     
-    // Variabel menyimpan password sesi
-    let currentAdminPass = "";
+    let currentAdminPass = sessionStorage.getItem("pklAdminPass") || "";
+    let rawNaskahData = [];
+    let rawPresentasiData = [];
+
+    window.onload = function() {
+      updateNavbarState();
+    };
+
+    function updateNavbarState() {
+      const isLoggedIn = currentAdminPass !== "";
+      document.getElementById('navBtnLogin').style.display = isLoggedIn ? 'none' : 'inline-block';
+      document.getElementById('navBtnDashboard').style.display = isLoggedIn ? 'inline-block' : 'none';
+      document.getElementById('navBtnLogout').style.display = isLoggedIn ? 'inline-block' : 'none';
+    }
 
     async function sendDataToAPI(payload) {
       try {
         const response = await fetch(URL_API_GOOGLE_SCRIPT, {
-          method: 'POST', redirect: 'follow',
+          method: 'POST',
+          redirect: 'follow',
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload)
         });
         return await response.json();
       } catch (error) {
-        return { status: "Error", message: "Gagal terhubung ke server." };
+        console.error(error);
+        return { status: "Error", message: "Gagal terhubung ke server Google." };
       }
     }
 
     function showPage(pageId) {
       document.querySelectorAll('.page-section').forEach(page => page.style.display = 'none');
-      document.getElementById('mainContainer').style.display = (pageId === 'pageDashboard') ? 'none' : 'block';
-      document.getElementById(pageId).style.display = 'block';
+      
+      if (pageId === 'pageDashboard') {
+        if (!currentAdminPass) {
+          showPage('pageLogin');
+          return;
+        }
+        document.getElementById('mainContainer').style.display = 'none';
+        document.getElementById('pageDashboard').style.display = 'block';
+        loadDashboardData();
+      } else {
+        document.getElementById('pageDashboard').style.display = 'none';
+        document.getElementById('mainContainer').style.display = 'block';
+        document.getElementById(pageId).style.display = 'block';
+      }
+    }
+
+    function togglePassword() {
+      const passInput = document.getElementById('loginPass');
+      passInput.type = passInput.type === 'password' ? 'text' : 'password';
     }
 
     function toggleCanva() {
       const isYa = document.getElementById('canvaYa').checked;
-      const canvaInput = document.getElementById('p_canva');
-      canvaInput.style.display = isYa ? 'block' : 'none';
-      canvaInput.required = isYa;
+      const container = document.getElementById('canvaContainer');
+      const input = document.getElementById('p_canva');
+      container.style.display = isYa ? 'block' : 'none';
+      input.required = isYa;
+      if (!isYa) input.value = '';
     }
 
     // ==========================================
-    // LOGIKA LOGIN DAN DASHBOARD
+    // LOGIN & LOGOUT
     // ==========================================
     async function prosesLogin(e) {
       e.preventDefault();
-      const user = document.getElementById('loginUser').value;
+      const user = document.getElementById('loginUser').value.trim();
       const pass = document.getElementById('loginPass').value;
       const btn = document.getElementById('btnLogin');
       const status = document.getElementById('loginStatus');
       
-      btn.innerText = "Memverifikasi..."; btn.disabled = true; status.innerText = "";
+      btn.innerText = "Memverifikasi akun..."; 
+      btn.disabled = true; 
+      status.innerText = "";
       
       const response = await sendDataToAPI({ action: "login", username: user, password: pass });
       
       if (response.status === "Sukses") {
-        currentAdminPass = pass; // Simpan token password
-        document.getElementById('loginUser').value = ""; document.getElementById('loginPass').value = "";
+        currentAdminPass = pass;
+        sessionStorage.setItem("pklAdminPass", pass);
+        document.getElementById('loginUser').value = ""; 
+        document.getElementById('loginPass').value = "";
+        updateNavbarState();
         showPage('pageDashboard');
-        loadDashboardData(); // Tarik data tabel
       } else {
-        status.innerText = response.message;
+        status.innerText = response.message || "Username atau password salah!";
       }
-      btn.innerText = "Masuk"; btn.disabled = false;
+      btn.innerText = "Masuk ke Dashboard"; 
+      btn.disabled = false;
     }
 
     function logout() {
       currentAdminPass = "";
+      sessionStorage.removeItem("pklAdminPass");
+      updateNavbarState();
       showPage('pageMenu');
     }
 
-    function switchTab(tabId, el) {
-      document.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
-      el.classList.add('active');
+    // ==========================================
+    // DASHBOARD & FILTER TABEL
+    // ==========================================
+    function switchTab(tabId) {
+      document.getElementById('btnTabNaskah').classList.toggle('active', tabId === 'tabNaskah');
+      document.getElementById('btnTabPresentasi').classList.toggle('active', tabId === 'tabPresentasi');
       document.getElementById('tabNaskah').style.display = (tabId === 'tabNaskah') ? 'block' : 'none';
       document.getElementById('tabPresentasi').style.display = (tabId === 'tabPresentasi') ? 'block' : 'none';
     }
 
-    function createLink(url, label) {
-      if (!url || url === '-') return '-';
-      return `<a href="${url}" target="_blank" class="btn btn-sm btn-outline-primary file-link">${label}</a>`;
+    function createActionBtn(url, label, btnClass) {
+      if (!url || url === '-') return '<span class="text-muted">-</span>';
+      return `<a href="${url}" target="_blank" class="btn btn-sm ${btnClass}">${label}</a>`;
     }
 
     async function loadDashboardData() {
       const tbNaskah = document.getElementById('tableBodyNaskah');
       const tbPresentasi = document.getElementById('tableBodyPresentasi');
       
-      tbNaskah.innerHTML = '<tr><td colspan="7">Memuat data dari Google Sheets...</td></tr>';
-      tbPresentasi.innerHTML = '<tr><td colspan="7">Memuat data dari Google Sheets...</td></tr>';
+      tbNaskah.innerHTML = '<tr><td colspan="8" class="text-center py-4">⏳ Sedang mengambil data dari Google Sheets...</td></tr>';
+      tbPresentasi.innerHTML = '<tr><td colspan="8" class="text-center py-4">⏳ Sedang mengambil data dari Google Sheets...</td></tr>';
 
       const response = await sendDataToAPI({ action: "getDashboard", password: currentAdminPass });
       
       if (response.status === "Sukses") {
-        // Render Tabel Naskah
-        tbNaskah.innerHTML = response.naskah.length === 0 ? '<tr><td colspan="7">Belum ada data</td></tr>' : 
-          response.naskah.map(d => `
-            <tr>
-              <td>${d.waktu}</td><td>${d.nama1} <br><small>(${d.nisn1})</small></td>
-              <td>${d.nama2 !== '-' ? d.nama2 + '<br><small>('+d.nisn1+')</small>' : '-'}</td>
-              <td>${d.kelas}</td><td>${d.tempat}</td>
-              <td>${createLink(d.docx, '⬇️ DOCX')}</td><td>${createLink(d.pdf, '⬇️ PDF')}</td>
-            </tr>
-          `).join('');
-
-        // Render Tabel Presentasi
-        tbPresentasi.innerHTML = response.presentasi.length === 0 ? '<tr><td colspan="7">Belum ada data</td></tr>' : 
-          response.presentasi.map(d => `
-            <tr>
-              <td>${d.waktu}</td><td>${d.nama}</td><td>${d.nisn}</td><td>${d.kelas}</td><td>${d.tempat}</td>
-              <td>${createLink(d.slide, '⬇️ File Slide')}</td><td>${createLink(d.canva, '🔗 Buka Canva')}</td>
-            </tr>
-          `).join('');
+        rawNaskahData = response.naskah || [];
+        rawPresentasiData = response.presentasi || [];
+        document.getElementById('countNaskah').innerText = rawNaskahData.length + " Laporan";
+        document.getElementById('countPresentasi').innerText = rawPresentasiData.length + " Slide";
+        filterTables();
       } else {
-        tbNaskah.innerHTML = '<tr><td colspan="7" class="text-danger">Gagal memuat data.</td></tr>';
+        tbNaskah.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Gagal memuat data: ${response.message}</td></tr>`;
+        tbPresentasi.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Gagal memuat data: ${response.message}</td></tr>`;
       }
     }
 
+    function filterTables() {
+      const keyword = document.getElementById('searchInput').value.toLowerCase();
+      const kelasFilter = document.getElementById('filterKelas').value;
+
+      const filteredNaskah = rawNaskahData.filter(d => {
+        const matchKelas = kelasFilter === "" || d.kelas === kelasFilter;
+        const text = `${d.nama1} ${d.nisn1} ${d.nama2} ${d.nisn2} ${d.tempat}`.toLowerCase();
+        return matchKelas && text.includes(keyword);
+      });
+
+      const tbNaskah = document.getElementById('tableBodyNaskah');
+      tbNaskah.innerHTML = filteredNaskah.length === 0 
+        ? '<tr><td colspan="8" class="text-center text-muted py-3">Tidak ada data naskah yang sesuai.</td></tr>'
+        : filteredNaskah.map((d, idx) => `
+          <tr>
+            <td class="text-center">${idx + 1}</td>
+            <td>${d.waktu}</td>
+            <td><strong>${d.nama1}</strong><br><small class="text-muted">NISN: ${d.nisn1}</small></td>
+            <td>${d.nama2 && d.nama2 !== '-' ? `<strong>${d.nama2}</strong><br><small class="text-muted">NISN: ${d.nisn2 || '-'}</small>` : '<span class="text-muted">Individu</span>'}</td>
+            <td class="text-center"><span class="badge bg-secondary">${d.kelas}</span></td>
+            <td>${d.tempat}</td>
+            <td class="text-center">${createActionBtn(d.docx, '📥 DOCX', 'btn-outline-primary')}</td>
+            <td class="text-center">${createActionBtn(d.pdf, '📥 PDF', 'btn-outline-danger')}</td>
+          </tr>
+        `).join('');
+
+      const filteredPresentasi = rawPresentasiData.filter(d => {
+        const matchKelas = kelasFilter === "" || d.kelas === kelasFilter;
+        const text = `${d.nama} ${d.nisn} ${d.tempat}`.toLowerCase();
+        return matchKelas && text.includes(keyword);
+      });
+
+      const tbPresentasi = document.getElementById('tableBodyPresentasi');
+      tbPresentasi.innerHTML = filteredPresentasi.length === 0 
+        ? '<tr><td colspan="8" class="text-center text-muted py-3">Tidak ada data presentasi yang sesuai.</td></tr>'
+        : filteredPresentasi.map((d, idx) => `
+          <tr>
+            <td class="text-center">${idx + 1}</td>
+            <td>${d.waktu}</td>
+            <td><strong>${d.nama}</strong></td>
+            <td>${d.nisn}</td>
+            <td class="text-center"><span class="badge bg-secondary">${d.kelas}</span></td>
+            <td>${d.tempat}</td>
+            <td class="text-center">${createActionBtn(d.slide, '📥 File Slide', 'btn-outline-success')}</td>
+            <td class="text-center">${createActionBtn(d.canva, '🔗 Buka Canva', 'btn-outline-info text-dark')}</td>
+          </tr>
+        `).join('');
+    }
+
     // ==========================================
-    // LOGIKA UPLOAD (Sama dengan versi sebelumnya, ditambahkan payload.action)
+    // VALIDASI & UPLOAD FORM SISWA
     // ==========================================
+    function isValidFile(fileInputId, allowedExtensions, errorElId) {
+      const file = document.getElementById(fileInputId).files[0];
+      const errorEl = document.getElementById(errorElId);
+      errorEl.innerText = '';
+      if (!file) return true; 
+
+      const fileExt = file.name.split('.').pop().toLowerCase();
+      if (!allowedExtensions.includes(fileExt)) {
+        errorEl.innerText = `Format tidak valid! Harus: ${allowedExtensions.join(', ').toUpperCase()}`;
+        return false;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        errorEl.innerText = 'Ukuran file melebihi batas maksimal 10 MB!';
+        return false;
+      }
+      return true;
+    }
+
     function getFileContext(id) {
       return new Promise((res, rej) => {
         const file = document.getElementById(id).files[0];
@@ -257,14 +535,21 @@
         const ext = file.name.split('.').pop().toLowerCase();
         const reader = new FileReader();
         reader.onload = () => res({ base64: reader.result, ext: ext });
-        reader.onerror = err => rej(err); reader.readAsDataURL(file);
+        reader.onerror = err => rej(err); 
+        reader.readAsDataURL(file);
       });
     }
 
     async function submitNaskah(e) {
       e.preventDefault();
-      const btn = document.getElementById('btnSubmitNaskah'); const status = document.getElementById('statusNaskah');
-      btn.disabled = true; btn.innerText = 'Mengupload...'; status.innerText = '';
+      if (!isValidFile('n_file_docx', ['doc', 'docx'], 'n_error_docx')) return;
+      if (!isValidFile('n_file_pdf', ['pdf'], 'n_error_pdf')) return;
+
+      const btn = document.getElementById('btnSubmitNaskah'); 
+      const status = document.getElementById('statusNaskah');
+      btn.disabled = true; 
+      btn.innerText = 'Mengupload naskah, harap tunggu...'; 
+      status.innerText = '';
 
       try {
         const docxData = await getFileContext('n_file_docx');
@@ -273,46 +558,84 @@
         const payload = {
           action: "submitForm",
           data: {
-            formType: 'Naskah', nama1: document.getElementById('n_nama1').value, nisn1: document.getElementById('n_nisn1').value,
-            nama2: document.getElementById('n_nama2').value, nisn2: document.getElementById('n_nisn2').value,
-            kelas: document.getElementById('n_kelas').value, tempatPKL: document.getElementById('n_tempat').value,
-            fileDocxBase64: docxData.base64, extDocx: docxData.ext,
-            filePdfBase64: pdfData ? pdfData.base64 : '', extPdf: pdfData ? pdfData.ext : ''
+            formType: 'Naskah', 
+            nama1: document.getElementById('n_nama1').value, 
+            nisn1: document.getElementById('n_nisn1').value,
+            nama2: document.getElementById('n_nama2').value, 
+            nisn2: document.getElementById('n_nisn2').value,
+            kelas: document.getElementById('n_kelas').value, 
+            tempatPKL: document.getElementById('n_tempat').value,
+            fileDocxBase64: docxData.base64, 
+            extDocx: docxData.ext,
+            filePdfBase64: pdfData ? pdfData.base64 : '', 
+            extPdf: pdfData ? pdfData.ext : ''
           }
         };
 
         const res = await sendDataToAPI(payload);
-        if(res.status === 'Berhasil') { status.innerHTML = '<span class="text-success">Terkirim!</span>'; document.getElementById('formNaskah').reset(); } 
-        else { status.innerHTML = `<span class="text-danger">Error: ${res.message}</span>`; }
-      } catch (err) { status.innerHTML = '<span class="text-danger">Gagal terhubung.</span>'; } 
-      finally { btn.disabled = false; btn.innerText = 'Kirim Naskah Laporan'; }
+        if (res.status === 'Berhasil') { 
+          status.innerHTML = '<span class="text-success">✅ Naskah laporan berhasil dikirim!</span>'; 
+          document.getElementById('formNaskah').reset(); 
+        } else { 
+          status.innerHTML = `<span class="text-danger">❌ Error: ${res.message}</span>`; 
+        }
+      } catch (err) { 
+        status.innerHTML = '<span class="text-danger">❌ Gagal terhubung ke server.</span>'; 
+      } finally { 
+        btn.disabled = false; 
+        btn.innerText = 'Kirim Naskah Laporan'; 
+      }
     }
 
     async function submitPresentasi(e) {
       e.preventDefault();
       const isCanvaYa = document.getElementById('canvaYa').checked;
       const fileLen = document.getElementById('p_file').files.length;
-      if (!isCanvaYa && fileLen === 0) { alert("Wajib upload File PPT/PDF atau Link Canva!"); return; }
+      const errorEl = document.getElementById('p_file_error');
+      errorEl.innerText = '';
 
-      const btn = document.getElementById('btnSubmitPresentasi'); const status = document.getElementById('statusPresentasi');
-      btn.disabled = true; btn.innerText = 'Mengupload...'; status.innerText = '';
+      if (!isCanvaYa && fileLen === 0) { 
+        errorEl.innerText = 'Wajib upload File PPT/PDF jika tidak menggunakan Link Canva!'; 
+        return; 
+      }
+      if (fileLen > 0 && !isValidFile('p_file', ['pdf', 'ppt', 'pptx'], 'p_file_error')) return;
+
+      const btn = document.getElementById('btnSubmitPresentasi'); 
+      const status = document.getElementById('statusPresentasi');
+      btn.disabled = true; 
+      btn.innerText = 'Mengupload presentasi, harap tunggu...'; 
+      status.innerText = '';
 
       try {
         const slideData = await getFileContext('p_file');
         const payload = {
           action: "submitForm",
           data: {
-            formType: 'Presentasi', namaLengkap: document.getElementById('p_nama').value, nisn: document.getElementById('p_nisn').value,
-            kelas: document.getElementById('p_kelas').value, tempatPKL: document.getElementById('p_tempat').value, 
-            linkCanva: document.getElementById('p_canva').value, fileSlideBase64: slideData ? slideData.base64 : '', extSlide: slideData ? slideData.ext : ''
+            formType: 'Presentasi', 
+            namaLengkap: document.getElementById('p_nama').value, 
+            nisn: document.getElementById('p_nisn').value,
+            kelas: document.getElementById('p_kelas').value, 
+            tempatPKL: document.getElementById('p_tempat').value, 
+            linkCanva: document.getElementById('p_canva').value, 
+            fileSlideBase64: slideData ? slideData.base64 : '', 
+            extSlide: slideData ? slideData.ext : ''
           }
         };
 
         const res = await sendDataToAPI(payload);
-        if(res.status === 'Berhasil') { status.innerHTML = '<span class="text-success">Terkirim!</span>'; document.getElementById('formPresentasi').reset(); toggleCanva(); } 
-        else { status.innerHTML = `<span class="text-danger">Error: ${res.message}</span>`; }
-      } catch (err) { status.innerHTML = '<span class="text-danger">Gagal terhubung.</span>'; } 
-      finally { btn.disabled = false; btn.innerText = 'Kirim Slide Presentasi'; }
+        if (res.status === 'Berhasil') { 
+          status.innerHTML = '<span class="text-success">✅ Slide presentasi berhasil dikirim!</span>'; 
+          document.getElementById('formPresentasi').reset(); 
+          toggleCanva(); 
+        } else { 
+          status.innerHTML = `<span class="text-danger">❌ Error: ${res.message}</span>`; 
+        }
+      } catch (err) { 
+        status.innerHTML = '<span class="text-danger">❌ Gagal terhubung ke server.</span>'; 
+      } finally { 
+        btn.disabled = false; 
+        btn.innerText = 'Kirim Slide Presentasi'; 
+      }
     }
   </script>
 </body>
