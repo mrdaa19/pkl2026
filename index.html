@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <base target="_top">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Portal Pengumpulan Naskah dan Slide PKL DKV 2026</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body { background-color: #f0f2f5; padding: 20px; font-family: 'Segoe UI', sans-serif; }
@@ -25,12 +26,8 @@
       <h3 class="text-center text-primary mb-4">Portal Pengumpulan PKL</h3>
       <p class="text-center text-muted mb-4">Pilih jenis file yang ingin dikumpulkan:</p>
       <div class="d-grid gap-3">
-        <button class="btn btn-primary menu-btn" onclick="showPage('pageNaskah')">
-          📄 Pengumpulan Naskah Laporan
-        </button>
-        <button class="btn btn-success menu-btn" onclick="showPage('pagePresentasi')">
-          📊 Pengumpulan Slide Presentasi
-        </button>
+        <button class="btn btn-primary menu-btn" onclick="showPage('pageNaskah')">📄 Pengumpulan Naskah Laporan</button>
+        <button class="btn btn-success menu-btn" onclick="showPage('pagePresentasi')">📊 Pengumpulan Slide Presentasi</button>
       </div>
     </div>
 
@@ -39,7 +36,6 @@
       <div class="btn-back" onclick="showPage('pageMenu')">← Kembali ke Menu</div>
       <h4 class="text-primary mb-3">Upload Naskah Laporan</h4>
       <form id="formNaskah" onsubmit="submitNaskah(event)">
-        
         <div class="sub-section">
           <h6 class="fw-bold text-secondary">Data Siswa 1</h6>
           <div class="mb-2">
@@ -74,7 +70,7 @@
         </div>
         <div class="mb-3">
           <label class="form-label">Nama Tempat PKL <span class="text-danger">*</span></label>
-          <input type="text" class="form-control" id="n_tempat" placeholder="Contoh: PT. Maju Jaya" required>
+          <input type="text" class="form-control" id="n_tempat" required>
         </div>
         
         <div class="mb-3 mt-4">
@@ -83,7 +79,6 @@
           <div class="form-text text-danger" id="n_error_docx"></div>
         </div>
         <div class="mb-4">
-          <!-- HAPUS REQUIRED DAN UBAH LABEL -->
           <label class="form-label fw-bold">2. Upload File PDF <span class="text-muted">(Opsional jika ada)</span></label>
           <input type="file" class="form-control" id="n_file_pdf" accept=".pdf">
           <div class="form-text text-danger" id="n_error_pdf"></div>
@@ -99,7 +94,6 @@
       <div class="btn-back" onclick="showPage('pageMenu')">← Kembali ke Menu</div>
       <h4 class="text-success mb-3">Upload Slide Presentasi</h4>
       <form id="formPresentasi" onsubmit="submitPresentasi(event)">
-        
         <div class="mb-3">
           <label class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
           <input type="text" class="form-control" id="p_nama" required>
@@ -118,7 +112,7 @@
         </div>
         <div class="mb-3">
           <label class="form-label">Nama Tempat PKL <span class="text-danger">*</span></label>
-          <input type="text" class="form-control" id="p_tempat" placeholder="Contoh: Percetakan Abadi" required>
+          <input type="text" class="form-control" id="p_tempat" required>
         </div>
 
         <div class="mb-3">
@@ -127,9 +121,8 @@
           <div class="form-text text-danger" id="p_file_error"></div>
         </div>
 
-        <!-- Pertanyaan Interaktif Canva -->
         <div class="mb-3 sub-section border-success">
-          <label class="form-label fw-bold">Apakah ada Link Canva untuk presentasi? jika ada pilih ya dan tuliskan linknya</label>
+          <label class="form-label fw-bold">Apakah Anda menggunakan Link Canva?</label>
           <div>
             <div class="form-check form-check-inline">
               <input class="form-check-input" type="radio" name="pakaiCanva" id="canvaYa" value="ya" onchange="toggleCanva()">
@@ -140,10 +133,9 @@
               <label class="form-check-label" for="canvaTidak">Tidak</label>
             </div>
           </div>
-          
           <div id="canvaContainer" class="mt-3" style="display: none;">
             <label class="form-label text-success">Masukkan Link Canva Anda <span class="text-danger">*</span></label>
-            <input type="url" class="form-control border-success" id="p_canva" placeholder="https://canva.com/...">
+            <input type="url" class="form-control border-success" id="p_canva">
           </div>
         </div>
 
@@ -151,10 +143,31 @@
         <div id="statusPresentasi" class="mt-3 text-center fw-bold"></div>
       </form>
     </div>
-
   </div>
 
   <script>
+    // =====================================================================
+    // PASTE URL WEB APP GOOGLE SCRIPT (BERAKHIRAN /exec) DI BAWAH INI
+    // =====================================================================
+    const URL_API_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxraP6Pt3k6ObaZO2FHFyuWqN9ikS4LEvnHGO2AvYjTstHkX1h2pC5danncjZymUbx2bw/exec";
+    
+    // Fungsi untuk mengirim data ke Google Script API via POST (Fetch)
+    async function sendDataToAPI(formData) {
+      try {
+        const response = await fetch(URL_API_GOOGLE_SCRIPT, {
+          method: 'POST',
+          // Tidak menggunakan Content-Type 'application/json' agar menghindari CORS Preflight dari GAS
+          body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        return result;
+      } catch (error) {
+        console.error(error);
+        return { status: "Error", message: "Gagal terhubung ke server Google." };
+      }
+    }
+
     function showPage(pageId) {
       document.querySelectorAll('.page-section').forEach(page => page.classList.remove('active-page'));
       document.getElementById(pageId).classList.add('active-page');
@@ -163,14 +176,13 @@
       document.getElementById('formPresentasi').reset();
       document.getElementById('statusNaskah').innerHTML = '';
       document.getElementById('statusPresentasi').innerHTML = '';
-      toggleCanva(); // Reset toggle Canva
+      toggleCanva();
     }
 
     function toggleCanva() {
       const isYa = document.getElementById('canvaYa').checked;
       const canvaContainer = document.getElementById('canvaContainer');
       const canvaInput = document.getElementById('p_canva');
-      
       if (isYa) {
         canvaContainer.style.display = 'block';
         canvaInput.required = true;
@@ -181,11 +193,10 @@
       }
     }
 
-    // Ekstrak Base64 dan Ekstensi
     function getFileContext(fileInputId) {
       return new Promise((resolve, reject) => {
         const file = document.getElementById(fileInputId).files[0];
-        if (!file) { resolve(null); return; } // Kembalikan null jika file kosong
+        if (!file) { resolve(null); return; } 
         
         const ext = file.name.split('.').pop().toLowerCase();
         const reader = new FileReader();
@@ -199,7 +210,7 @@
       const file = document.getElementById(fileInputId).files[0];
       const errorEl = document.getElementById(errorElId);
       errorEl.innerText = '';
-      if (!file) return true; // Lolos jika file dikosongkan (berguna untuk PDF yang opsional)
+      if (!file) return true; 
 
       const fileExt = file.name.split('.').pop().toLowerCase();
       if (!allowedExtensions.includes(fileExt)) {
@@ -211,9 +222,8 @@
 
     async function submitNaskah(e) {
       e.preventDefault();
-      
       if (!isValidFile('n_file_docx', ['doc', 'docx'], 'n_error_docx')) return;
-      if (!isValidFile('n_file_pdf', ['pdf'], 'n_error_pdf')) return; // Tetap divalidasi jika diisi, jika kosong akan lolos
+      if (!isValidFile('n_file_pdf', ['pdf'], 'n_error_pdf')) return;
 
       const btn = document.getElementById('btnSubmitNaskah');
       const status = document.getElementById('statusNaskah');
@@ -235,25 +245,21 @@
           tempatPKL: document.getElementById('n_tempat').value,
           fileDocxBase64: docxData.base64,
           extDocx: docxData.ext,
-          // Handle jika pdfData null (kosong)
           filePdfBase64: pdfData ? pdfData.base64 : '',
           extPdf: pdfData ? pdfData.ext : ''
         };
 
-        google.script.run
-          .withSuccessHandler(res => {
-            if(res === 'Berhasil') {
-              status.innerHTML = '<span class="text-success">Naskah berhasil dikirim! Nama file telah disesuaikan otomatis.</span>';
-              document.getElementById('formNaskah').reset();
-            } else {
-              status.innerHTML = '<span class="text-danger">' + res + '</span>';
-            }
-            btn.disabled = false;
-            btn.innerText = 'Kirim Naskah Laporan';
-          })
-          .processForm(formData);
+        const response = await sendDataToAPI(formData);
+        
+        if(response.status === 'Berhasil') {
+          status.innerHTML = '<span class="text-success">Naskah berhasil dikirim!</span>';
+          document.getElementById('formNaskah').reset();
+        } else {
+          status.innerHTML = `<span class="text-danger">Error: ${response.message || 'Gagal'}</span>`;
+        }
       } catch (err) {
-        status.innerHTML = '<span class="text-danger">Gagal mengupload.</span>';
+        status.innerHTML = '<span class="text-danger">Gagal mengupload. Pastikan koneksi stabil.</span>';
+      } finally {
         btn.disabled = false;
         btn.innerText = 'Kirim Naskah Laporan';
       }
@@ -261,18 +267,15 @@
 
     async function submitPresentasi(e) {
       e.preventDefault();
-
       const isCanvaYa = document.getElementById('canvaYa').checked;
       const fileInputLen = document.getElementById('p_file').files.length;
       const errorEl = document.getElementById('p_file_error');
       errorEl.innerText = '';
 
-      // Validasi: Jika tidak pakai canva, maka wajib upload file
       if (!isCanvaYa && fileInputLen === 0) {
-        errorEl.innerText = 'Anda harus mengupload File jika tidak menggunakan Link Canva!';
+        errorEl.innerText = 'Wajib upload File jika tidak menggunakan Link Canva!';
         return;
       }
-      
       if (fileInputLen > 0 && !isValidFile('p_file', ['pdf', 'ppt', 'pptx'], 'p_file_error')) return;
 
       const btn = document.getElementById('btnSubmitPresentasi');
@@ -283,7 +286,6 @@
 
       try {
         const slideData = await getFileContext('p_file');
-        
         const formData = {
           formType: 'Presentasi',
           namaLengkap: document.getElementById('p_nama').value,
@@ -295,21 +297,18 @@
           extSlide: slideData ? slideData.ext : ''
         };
 
-        google.script.run
-          .withSuccessHandler(res => {
-            if(res === 'Berhasil') {
-              status.innerHTML = '<span class="text-success">Slide Presentasi berhasil dikirim!</span>';
-              document.getElementById('formPresentasi').reset();
-              toggleCanva();
-            } else {
-              status.innerHTML = '<span class="text-danger">' + res + '</span>';
-            }
-            btn.disabled = false;
-            btn.innerText = 'Kirim Slide Presentasi';
-          })
-          .processForm(formData);
+        const response = await sendDataToAPI(formData);
+        
+        if(response.status === 'Berhasil') {
+          status.innerHTML = '<span class="text-success">Slide Presentasi berhasil dikirim!</span>';
+          document.getElementById('formPresentasi').reset();
+          toggleCanva();
+        } else {
+          status.innerHTML = `<span class="text-danger">Error: ${response.message || 'Gagal'}</span>`;
+        }
       } catch (err) {
-        status.innerHTML = '<span class="text-danger">Gagal mengupload.</span>';
+        status.innerHTML = '<span class="text-danger">Gagal mengupload. Pastikan koneksi stabil.</span>';
+      } finally {
         btn.disabled = false;
         btn.innerText = 'Kirim Slide Presentasi';
       }
