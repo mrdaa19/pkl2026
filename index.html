@@ -152,19 +152,22 @@
     const URL_API_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxraP6Pt3k6ObaZO2FHFyuWqN9ikS4LEvnHGO2AvYjTstHkX1h2pC5danncjZymUbx2bw/exec";
     
     // Fungsi untuk mengirim data ke Google Script API via POST (Fetch)
-    async function sendDataToAPI(formData) {
+   async function sendDataToAPI(formData) {
       try {
         const response = await fetch(URL_API_GOOGLE_SCRIPT, {
           method: 'POST',
-          // Tidak menggunakan Content-Type 'application/json' agar menghindari CORS Preflight dari GAS
+          redirect: 'follow', // WAJIB ADA: Karena Google Script selalu mengalihkan (redirect) URL
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8", // WAJIB ADA: Mencegah blokir CORS (Preflight)
+          },
           body: JSON.stringify(formData)
         });
         
         const result = await response.json();
         return result;
       } catch (error) {
-        console.error(error);
-        return { status: "Error", message: "Gagal terhubung ke server Google." };
+        console.error("Detail Error Browser:", error);
+        return { status: "Error", message: "Gagal terhubung ke server Google. (Masalah CORS/Jaringan)" };
       }
     }
 
