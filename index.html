@@ -438,7 +438,7 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     const URL_API_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxraP6Pt3k6ObaZO2FHFyuWqN9ikS4LEvnHGO2AvYjTstHkX1h2pC5danncjZymUbx2bw/exec";
     
@@ -563,8 +563,8 @@
       const tbNaskah = document.getElementById('tableBodyNaskah');
       const tbPresentasi = document.getElementById('tableBodyPresentasi');
       
-      tbNaskah.innerHTML = '<tr><td colspan="9" class="text-center py-4">Sedang mengambil Data...</td></tr>';
-      tbPresentasi.innerHTML = '<tr><td colspan="9" class="text-center py-4">Sedang mengambil Data...</td></tr>';
+      tbNaskah.innerHTML = '<tr><td colspan="9" class="text-center py-4">Sedang mengambil data dari Google Sheets...</td></tr>';
+      tbPresentasi.innerHTML = '<tr><td colspan="9" class="text-center py-4">Sedang mengambil data dari Google Sheets...</td></tr>';
 
       const response = await sendDataToAPI({ action: "getDashboard", password: currentAdminPass });
       
@@ -686,7 +686,7 @@
       }
 
       if (!isValidFile('edit_n_file_docx', ['doc', 'docx'], 'edit_n_error_docx')) return;
-      if (!isValidFile('edit_n_file_pdf', ['pdf'], 'edit_n_error_pdf')) return;
+      if (!isValidFile('edit_n_file_pdf', ['pdf'], 'edit_n_error_pdf', 10)) return;
 
       const btn = document.getElementById('btnSaveEditNaskah');
       const status = document.getElementById('statusEditNaskah');
@@ -851,7 +851,7 @@
     // ==========================================
     // VALIDASI & UPLOAD FORM SISWA
     // ==========================================
-    function isValidFile(fileInputId, allowedExtensions, errorElId) {
+    function isValidFile(fileInputId, allowedExtensions, errorElId, maxSizeMB = null) {
       const file = document.getElementById(fileInputId).files[0];
       const errorEl = document.getElementById(errorElId);
       errorEl.innerText = '';
@@ -862,8 +862,8 @@
         errorEl.innerText = `Format tidak valid! Harus: ${allowedExtensions.join(', ').toUpperCase()}`;
         return false;
       }
-      if (file.size > 10 * 1024 * 1024) {
-        errorEl.innerText = 'Ukuran file melebihi batas maksimal 10 MB!';
+      if (maxSizeMB && file.size > maxSizeMB * 1024 * 1024) {
+        errorEl.innerText = `Ukuran file melebihi batas maksimal ${maxSizeMB} MB!`;
         return false;
       }
       return true;
@@ -907,7 +907,7 @@
       }
 
       if (!isValidFile('n_file_docx', ['doc', 'docx'], 'n_error_docx')) return;
-      if (!isValidFile('n_file_pdf', ['pdf'], 'n_error_pdf')) return;
+      if (!isValidFile('n_file_pdf', ['pdf'], 'n_error_pdf', 10)) return;
 
       const btn = document.getElementById('btnSubmitNaskah'); 
       const status = document.getElementById('statusNaskah');
