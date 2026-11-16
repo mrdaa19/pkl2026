@@ -743,15 +743,13 @@
       filterTables();
     }
 
-    function resetAllFilters() {
-      document.getElementById('searchInput').value = '';
-      resetFilterNaskah();
-      resetFilterPresentasi();
-    }
+    // function resetAllFilters() {
+    //   document.getElementById('searchInput').value = '';
+    //   resetFilterNaskah();
+    //   resetFilterPresentasi();
+    // }
 
-    function filterTables() {
-      const globalKeyword = document.getElementById('searchInput').value.toLowerCase().trim();
-
+   function filterTables() {
       // --- FILTER DATA NASKAH ---
       const colNWaktu = document.getElementById('col_n_waktu').value.toLowerCase().trim();
       const colNSiswa1 = document.getElementById('col_n_siswa1').value.toLowerCase().trim();
@@ -762,9 +760,6 @@
       const colNPdf = document.getElementById('col_n_pdf').value;
 
       filteredNaskahList = rawNaskahData.filter(d => {
-        const globalText = `${d.waktu} ${d.nama1} ${d.nisn1} ${d.nama2} ${d.nisn2} ${d.kelas} ${d.tempat}`.toLowerCase();
-        if (globalKeyword && !globalText.includes(globalKeyword)) return false;
-
         if (colNWaktu && !d.waktu.toLowerCase().includes(colNWaktu)) return false;
         
         const textSiswa1 = `${d.nama1} ${d.nisn1}`.toLowerCase();
@@ -826,9 +821,6 @@
       const colPCanva = document.getElementById('col_p_canva').value;
 
       filteredPresentasiList = rawPresentasiData.filter(d => {
-        const globalText = `${d.waktu} ${d.nama} ${d.nisn} ${d.kelas} ${d.tempat}`.toLowerCase();
-        if (globalKeyword && !globalText.includes(globalKeyword)) return false;
-
         if (colPWaktu && !d.waktu.toLowerCase().includes(colPWaktu)) return false;
         if (colPNama && !d.nama.toLowerCase().includes(colPNama)) return false;
         if (colPNis && !String(d.nisn).toLowerCase().includes(colPNis)) return false;
