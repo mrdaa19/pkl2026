@@ -8,22 +8,28 @@
   <style>
     body { background-color: #f0f2f5; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     .card-box { max-width: 650px; margin: 20px auto; padding: 30px; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); background: #fff; }
-    .dashboard-box { max-width: 1180px; margin: 20px auto; padding: 25px; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); background: #fff; }
+    .dashboard-box { max-width: 1260px; margin: 20px auto; padding: 25px; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); background: #fff; }
     .page-section { display: none; } 
     .menu-btn { height: 85px; font-size: 17px; font-weight: 600; border-radius: 12px; transition: 0.25s; }
     .menu-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
     .btn-back { font-weight: 600; cursor: pointer; color: #64748b; margin-bottom: 20px; display: inline-block; text-decoration: none; }
     .btn-back:hover { color: #0d6efd; }
     .sub-section { background-color: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #0d6efd; }
-    .table-responsive { max-height: 520px; overflow-y: auto; }
+    .table-responsive { max-height: 540px; overflow-y: auto; }
     .stat-card { border-radius: 10px; padding: 15px; color: #fff; }
     .admin-link { font-size: 12px; color: #94a3b8; text-decoration: none; }
     .admin-link:hover { color: #475569; text-decoration: underline; }
+    .sticky-thead { position: sticky; top: 0; z-index: 2; }
+    .sortable-th { cursor: pointer; user-select: none; white-space: nowrap; }
+    .sortable-th:hover { filter: brightness(0.95); }
+    .filter-row th { background-color: #f8fafc !important; padding: 6px !important; }
+    .col-filter-input, .col-filter-select { font-size: 12px; padding: 4px 6px; min-width: 90px; }
+    .download-toolbar { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; }
   </style>
 </head>
 <body>
 
-  <div class="container px-2">
+  <div class="container-fluid px-2">
     <div class="card-box" id="mainContainer">
       
       <!-- 1. HALAMAN MENU UTAMA -->
@@ -38,7 +44,7 @@
           </button>
           <button class="btn btn-success menu-btn" onclick="showPage('pagePresentasi')">
             Pengumpulan Slide Presentasi<br>
-            <small class="fw-normal fs-6">(File PPT/PDF - Individu)</small>
+            <small class="fw-normal fs-6">(File PPT/PDF dan Link Canva — Individu)</small>
           </button>
         </div>
 
@@ -124,7 +130,7 @@
           </div>
 
           <div class="mb-4">
-            <label class="form-label fw-bold">2. Upload File Naskah (PDF) <span class="text-muted fw-normal">(Opsional jika ada)</span></label>
+            <label class="form-label fw-bold">2. Upload File Naskah (PDF) <span class="text-muted fw-normal">(Opsional jika ada, maks. 10 MB)</span></label>
             <input type="file" class="form-control" id="n_file_pdf" accept=".pdf">
             <div class="form-text text-danger" id="n_error_pdf"></div>
           </div>
@@ -199,7 +205,7 @@
       <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <div>
           <h3 class="text-dark fw-bold m-0">Dashboard Rekap PKL 12 DKV</h3>
-          <small class="text-muted">Pantau, edit, hapus, dan unduh file laporan maupun slide presentasi siswa</small>
+          <small class="text-muted">Pantau, filter per kolom, edit, hapus, dan unduh file massal (.zip)</small>
         </div>
         <div class="d-flex gap-2">
           <button class="btn btn-outline-primary btn-sm fw-bold" onclick="loadDashboardData()">Refresh Data</button>
@@ -223,17 +229,13 @@
         </div>
       </div>
 
-      <!-- Filter Pencarian & Kelas -->
+      <!-- Pencarian Global Cepat -->
       <div class="row g-2 mb-3">
-        <div class="col-md-8">
-          <input type="text" id="searchInput" class="form-control" placeholder="Cari nama siswa, NIS, atau tempat PKL..." onkeyup="filterTables()">
+        <div class="col-md-9">
+          <input type="text" id="searchInput" class="form-control" placeholder="Pencarian cepat semua kolom (nama, NIS, kelas, atau tempat PKL)..." onkeyup="filterTables()">
         </div>
-        <div class="col-md-4">
-          <select id="filterKelas" class="form-select" onchange="filterTables()">
-            <option value="">Semua Kelas (12 DKV 1 & 2)</option>
-            <option value="12 DKV 1">12 DKV 1</option>
-            <option value="12 DKV 2">12 DKV 2</option>
-          </select>
+        <div class="col-md-3 d-grid">
+          <button type="button" class="btn btn-outline-secondary fw-semibold" onclick="resetAllFilters()">Reset Semua Filter</button>
         </div>
       </div>
       
@@ -247,25 +249,87 @@
         </li>
       </ul>
 
+      <!-- TOOLBAR DOWNLOAD MASSAL (TERPILIH / SEMUA) -->
+      <div class="download-toolbar d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-dark" id="selectedCountBadge">0 data ditandai</span>
+          <button type="button" class="btn btn-link btn-sm text-decoration-none p-0" id="btnClearSelection" style="display:none;" onclick="clearSelection()">Batal tandai</button>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <button type="button" class="btn btn-sm btn-warning fw-bold" id="btnDownloadSelected" onclick="downloadZipFiles('selected')" disabled>
+            Download Terpilih (0)
+          </button>
+          <button type="button" class="btn btn-sm btn-dark fw-bold" id="btnDownloadAll" onclick="downloadZipFiles('all')">
+            Download Semua File (0)
+          </button>
+        </div>
+      </div>
+
+      <!-- INDIKATOR PROGRESS DOWNLOAD ZIP -->
+      <div id="zipProgressBox" class="alert alert-info py-2 px-3 mb-3" style="display: none;">
+        <div class="d-flex justify-content-between small fw-bold mb-1">
+          <span id="zipProgressText">Menyiapkan unduhan...</span>
+          <span id="zipProgressPercent">0%</span>
+        </div>
+        <div class="progress" style="height: 8px;">
+          <div id="zipProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;"></div>
+        </div>
+      </div>
+
       <!-- Tabel Naskah -->
       <div id="tabNaskah">
         <div class="table-responsive">
-          <table class="table table-bordered table-striped table-hover align-middle" style="font-size: 14px;">
-            <thead class="table-primary text-center">
-              <tr>
+          <table class="table table-bordered table-striped table-hover align-middle" style="font-size: 13.5px;">
+            <thead class="sticky-thead">
+              <tr class="table-primary text-center">
+                <th style="width: 36px;">
+                  <input type="checkbox" class="form-check-input" id="checkAllNaskah" title="Tandai semua yang tampil" onchange="toggleSelectAll('Naskah', this.checked)">
+                </th>
                 <th>No</th>
-                <th>Waktu Upload</th>
-                <th>Siswa 1 (NIS)</th>
-                <th>Siswa 2 (NIS)</th>
-                <th>Kelas</th>
-                <th>Tempat PKL</th>
+                <th class="sortable-th" onclick="toggleSort('Naskah', 'waktu')">Waktu Upload <span id="sort_n_waktu">⇅</span></th>
+                <th class="sortable-th" onclick="toggleSort('Naskah', 'nama1')">Siswa 1 (NIS) <span id="sort_n_nama1">⇅</span></th>
+                <th class="sortable-th" onclick="toggleSort('Naskah', 'nama2')">Siswa 2 (NIS) <span id="sort_n_nama2">⇅</span></th>
+                <th class="sortable-th" onclick="toggleSort('Naskah', 'kelas')">Kelas <span id="sort_n_kelas">⇅</span></th>
+                <th class="sortable-th" onclick="toggleSort('Naskah', 'tempat')">Tempat PKL <span id="sort_n_tempat">⇅</span></th>
                 <th>File DOCX</th>
                 <th>File PDF</th>
                 <th>Aksi</th>
               </tr>
+              <tr class="filter-row">
+                <th></th>
+                <th></th>
+                <th><input type="text" id="col_n_waktu" class="form-control col-filter-input" placeholder="Filter waktu..." onkeyup="filterTables()"></th>
+                <th><input type="text" id="col_n_siswa1" class="form-control col-filter-input" placeholder="Nama / NIS 1..." onkeyup="filterTables()"></th>
+                <th><input type="text" id="col_n_siswa2" class="form-control col-filter-input" placeholder="Nama / NIS 2 / Individu..." onkeyup="filterTables()"></th>
+                <th>
+                  <select id="col_n_kelas" class="form-select col-filter-select" onchange="filterTables()">
+                    <option value="">Semua</option>
+                    <option value="12 DKV 1">12 DKV 1</option>
+                    <option value="12 DKV 2">12 DKV 2</option>
+                  </select>
+                </th>
+                <th><input type="text" id="col_n_tempat" class="form-control col-filter-input" placeholder="Filter tempat..." onkeyup="filterTables()"></th>
+                <th>
+                  <select id="col_n_docx" class="form-select col-filter-select" onchange="filterTables()">
+                    <option value="">Semua</option>
+                    <option value="ada">Ada</option>
+                    <option value="kosong">Kosong</option>
+                  </select>
+                </th>
+                <th>
+                  <select id="col_n_pdf" class="form-select col-filter-select" onchange="filterTables()">
+                    <option value="">Semua</option>
+                    <option value="ada">Ada</option>
+                    <option value="kosong">Kosong</option>
+                  </select>
+                </th>
+                <th class="text-center">
+                  <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 11px;" onclick="resetFilterNaskah()">Reset</button>
+                </th>
+              </tr>
             </thead>
             <tbody id="tableBodyNaskah">
-              <tr><td colspan="9" class="text-center">Memuat data...</td></tr>
+              <tr><td colspan="10" class="text-center">Memuat data...</td></tr>
             </tbody>
           </table>
         </div>
@@ -274,22 +338,57 @@
       <!-- Tabel Presentasi -->
       <div id="tabPresentasi" style="display: none;">
         <div class="table-responsive">
-          <table class="table table-bordered table-striped table-hover align-middle" style="font-size: 14px;">
-            <thead class="table-success text-center">
-              <tr>
+          <table class="table table-bordered table-striped table-hover align-middle" style="font-size: 13.5px;">
+            <thead class="sticky-thead">
+              <tr class="table-success text-center">
+                <th style="width: 36px;">
+                  <input type="checkbox" class="form-check-input" id="checkAllPresentasi" title="Tandai semua yang tampil" onchange="toggleSelectAll('Presentasi', this.checked)">
+                </th>
                 <th>No</th>
-                <th>Waktu Upload</th>
-                <th>Nama Siswa</th>
-                <th>NIS</th>
-                <th>Kelas</th>
-                <th>Tempat PKL</th>
+                <th class="sortable-th" onclick="toggleSort('Presentasi', 'waktu')">Waktu Upload <span id="sort_p_waktu">⇅</span></th>
+                <th class="sortable-th" onclick="toggleSort('Presentasi', 'nama')">Nama Siswa <span id="sort_p_nama">⇅</span></th>
+                <th class="sortable-th" onclick="toggleSort('Presentasi', 'nisn')">NIS <span id="sort_p_nisn">⇅</span></th>
+                <th class="sortable-th" onclick="toggleSort('Presentasi', 'kelas')">Kelas <span id="sort_p_kelas">⇅</span></th>
+                <th class="sortable-th" onclick="toggleSort('Presentasi', 'tempat')">Tempat PKL <span id="sort_p_tempat">⇅</span></th>
                 <th>File Slide</th>
                 <th>Link Canva</th>
                 <th>Aksi</th>
               </tr>
+              <tr class="filter-row">
+                <th></th>
+                <th></th>
+                <th><input type="text" id="col_p_waktu" class="form-control col-filter-input" placeholder="Filter waktu..." onkeyup="filterTables()"></th>
+                <th><input type="text" id="col_p_nama" class="form-control col-filter-input" placeholder="Filter nama..." onkeyup="filterTables()"></th>
+                <th><input type="text" id="col_p_nis" class="form-control col-filter-input" placeholder="Filter NIS..." onkeyup="filterTables()"></th>
+                <th>
+                  <select id="col_p_kelas" class="form-select col-filter-select" onchange="filterTables()">
+                    <option value="">Semua</option>
+                    <option value="12 DKV 1">12 DKV 1</option>
+                    <option value="12 DKV 2">12 DKV 2</option>
+                  </select>
+                </th>
+                <th><input type="text" id="col_p_tempat" class="form-control col-filter-input" placeholder="Filter tempat..." onkeyup="filterTables()"></th>
+                <th>
+                  <select id="col_p_slide" class="form-select col-filter-select" onchange="filterTables()">
+                    <option value="">Semua</option>
+                    <option value="ada">Ada File</option>
+                    <option value="kosong">Kosong</option>
+                  </select>
+                </th>
+                <th>
+                  <select id="col_p_canva" class="form-select col-filter-select" onchange="filterTables()">
+                    <option value="">Semua</option>
+                    <option value="ada">Ada Link</option>
+                    <option value="kosong">Kosong</option>
+                  </select>
+                </th>
+                <th class="text-center">
+                  <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 11px;" onclick="resetFilterPresentasi()">Reset</button>
+                </th>
+              </tr>
             </thead>
             <tbody id="tableBodyPresentasi">
-              <tr><td colspan="9" class="text-center">Memuat data...</td></tr>
+              <tr><td colspan="10" class="text-center">Memuat data...</td></tr>
             </tbody>
           </table>
         </div>
@@ -344,7 +443,7 @@
                 <div class="form-text text-danger" id="edit_n_error_docx"></div>
               </div>
               <div class="col-md-6">
-                <label class="form-label fw-semibold">Ganti File PDF <span class="text-muted small">(Biarkan kosong jika tidak diganti)</span></label>
+                <label class="form-label fw-semibold">Ganti File PDF <span class="text-muted small">(Biarkan kosong jika tidak diganti, maks. 10 MB)</span></label>
                 <input type="file" class="form-control" id="edit_n_file_pdf" accept=".pdf">
                 <div class="form-text text-danger" id="edit_n_error_pdf"></div>
               </div>
@@ -427,7 +526,7 @@
           <div class="p-3 bg-light rounded border mb-2">
             <strong id="delete_infoText"></strong>
           </div>
-          <small class="text-danger">Data di Spreadsheet dan file terkait di Google Drive akan dihapus permanen.</small>
+          <small class="text-danger">Data akan dihapus permanen.</small>
           <div id="statusDelete" class="mt-2 text-center fw-bold text-danger"></div>
         </div>
         <div class="modal-footer">
@@ -438,13 +537,25 @@
     </div>
   </div>
 
- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script>
     const URL_API_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxraP6Pt3k6ObaZO2FHFyuWqN9ikS4LEvnHGO2AvYjTstHkX1h2pC5danncjZymUbx2bw/exec";
     
     let currentAdminPass = sessionStorage.getItem("pklAdminPass") || "";
     let rawNaskahData = [];
     let rawPresentasiData = [];
+    let filteredNaskahList = [];
+    let filteredPresentasiList = [];
+
+    let selectedNaskahRows = new Set();
+    let selectedPresentasiRows = new Set();
+    let activeTab = sessionStorage.getItem("pklActiveTab") || "tabNaskah";
+
+    let sortState = {
+      Naskah: { field: null, asc: true },
+      Presentasi: { field: null, asc: true }
+    };
 
     function filterNIS(input) {
       input.value = input.value.replace(/[^0-9]/g, '').slice(0, 6);
@@ -544,14 +655,16 @@
     }
 
     // ==========================================
-    // DASHBOARD & FILTER TABEL
+    // DASHBOARD, FILTER KOLOM & SORTING
     // ==========================================
     function switchTab(tabId) {
+      activeTab = tabId;
       sessionStorage.setItem("pklActiveTab", tabId);
       document.getElementById('btnTabNaskah').classList.toggle('active', tabId === 'tabNaskah');
       document.getElementById('btnTabPresentasi').classList.toggle('active', tabId === 'tabPresentasi');
       document.getElementById('tabNaskah').style.display = (tabId === 'tabNaskah') ? 'block' : 'none';
       document.getElementById('tabPresentasi').style.display = (tabId === 'tabPresentasi') ? 'block' : 'none';
+      updateDownloadToolbar();
     }
 
     function createActionBtn(url, label, btnClass) {
@@ -563,8 +676,8 @@
       const tbNaskah = document.getElementById('tableBodyNaskah');
       const tbPresentasi = document.getElementById('tableBodyPresentasi');
       
-      tbNaskah.innerHTML = '<tr><td colspan="9" class="text-center py-4">Sedang mengambil data dari Google Sheets...</td></tr>';
-      tbPresentasi.innerHTML = '<tr><td colspan="9" class="text-center py-4">Sedang mengambil data dari Google Sheets...</td></tr>';
+      tbNaskah.innerHTML = '<tr><td colspan="10" class="text-center py-4">Sedang mengambil data...</td></tr>';
+      tbPresentasi.innerHTML = '<tr><td colspan="10" class="text-center py-4">Sedang mengambil data...</td></tr>';
 
       const response = await sendDataToAPI({ action: "getDashboard", password: currentAdminPass });
       
@@ -575,26 +688,119 @@
         document.getElementById('countPresentasi').innerText = rawPresentasiData.length + " Slide";
         filterTables();
       } else {
-        tbNaskah.innerHTML = `<tr><td colspan="9" class="text-center text-danger">Gagal memuat data: ${response.message}</td></tr>`;
-        tbPresentasi.innerHTML = `<tr><td colspan="9" class="text-center text-danger">Gagal memuat data: ${response.message}</td></tr>`;
+        tbNaskah.innerHTML = `<tr><td colspan="10" class="text-center text-danger">Gagal memuat data: ${response.message}</td></tr>`;
+        tbPresentasi.innerHTML = `<tr><td colspan="10" class="text-center text-danger">Gagal memuat data: ${response.message}</td></tr>`;
       }
     }
 
-    function filterTables() {
-      const keyword = document.getElementById('searchInput').value.toLowerCase();
-      const kelasFilter = document.getElementById('filterKelas').value;
+    function toggleSort(jenis, field) {
+      if (sortState[jenis].field === field) {
+        sortState[jenis].asc = !sortState[jenis].asc;
+      } else {
+        sortState[jenis].field = field;
+        sortState[jenis].asc = true;
+      }
+      updateSortIcons();
+      filterTables();
+    }
 
-      const filteredNaskah = rawNaskahData.filter(d => {
-        const matchKelas = kelasFilter === "" || d.kelas === kelasFilter;
-        const text = `${d.nama1} ${d.nisn1} ${d.nama2} ${d.nisn2} ${d.tempat}`.toLowerCase();
-        return matchKelas && text.includes(keyword);
+    function updateSortIcons() {
+      const nFields = ['waktu', 'nama1', 'nama2', 'kelas', 'tempat'];
+      nFields.forEach(f => {
+        const el = document.getElementById(`sort_n_${f}`);
+        if (el) {
+          el.innerText = sortState.Naskah.field === f ? (sortState.Naskah.asc ? '▲' : '▼') : '⇅';
+        }
+      });
+      const pFields = ['waktu', 'nama', 'nisn', 'kelas', 'tempat'];
+      pFields.forEach(f => {
+        const el = document.getElementById(`sort_p_${f}`);
+        if (el) {
+          el.innerText = sortState.Presentasi.field === f ? (sortState.Presentasi.asc ? '▲' : '▼') : '⇅';
+        }
+      });
+    }
+
+    function resetFilterNaskah() {
+      document.getElementById('col_n_waktu').value = '';
+      document.getElementById('col_n_siswa1').value = '';
+      document.getElementById('col_n_siswa2').value = '';
+      document.getElementById('col_n_kelas').value = '';
+      document.getElementById('col_n_tempat').value = '';
+      document.getElementById('col_n_docx').value = '';
+      document.getElementById('col_n_pdf').value = '';
+      filterTables();
+    }
+
+    function resetFilterPresentasi() {
+      document.getElementById('col_p_waktu').value = '';
+      document.getElementById('col_p_nama').value = '';
+      document.getElementById('col_p_nis').value = '';
+      document.getElementById('col_p_kelas').value = '';
+      document.getElementById('col_p_tempat').value = '';
+      document.getElementById('col_p_slide').value = '';
+      document.getElementById('col_p_canva').value = '';
+      filterTables();
+    }
+
+    function resetAllFilters() {
+      document.getElementById('searchInput').value = '';
+      resetFilterNaskah();
+      resetFilterPresentasi();
+    }
+
+    function filterTables() {
+      const globalKeyword = document.getElementById('searchInput').value.toLowerCase().trim();
+
+      // --- FILTER DATA NASKAH ---
+      const colNWaktu = document.getElementById('col_n_waktu').value.toLowerCase().trim();
+      const colNSiswa1 = document.getElementById('col_n_siswa1').value.toLowerCase().trim();
+      const colNSiswa2 = document.getElementById('col_n_siswa2').value.toLowerCase().trim();
+      const colNKelas = document.getElementById('col_n_kelas').value;
+      const colNTempat = document.getElementById('col_n_tempat').value.toLowerCase().trim();
+      const colNDocx = document.getElementById('col_n_docx').value;
+      const colNPdf = document.getElementById('col_n_pdf').value;
+
+      filteredNaskahList = rawNaskahData.filter(d => {
+        const globalText = `${d.waktu} ${d.nama1} ${d.nisn1} ${d.nama2} ${d.nisn2} ${d.kelas} ${d.tempat}`.toLowerCase();
+        if (globalKeyword && !globalText.includes(globalKeyword)) return false;
+
+        if (colNWaktu && !d.waktu.toLowerCase().includes(colNWaktu)) return false;
+        
+        const textSiswa1 = `${d.nama1} ${d.nisn1}`.toLowerCase();
+        if (colNSiswa1 && !textSiswa1.includes(colNSiswa1)) return false;
+
+        const textSiswa2 = (d.nama2 && d.nama2 !== '-') ? `${d.nama2} ${d.nisn2}`.toLowerCase() : 'individu -';
+        if (colNSiswa2 && !textSiswa2.includes(colNSiswa2)) return false;
+
+        if (colNKelas && d.kelas !== colNKelas) return false;
+        if (colNTempat && !d.tempat.toLowerCase().includes(colNTempat)) return false;
+
+        const hasDocx = d.docx && d.docx !== '-';
+        if (colNDocx === 'ada' && !hasDocx) return false;
+        if (colNDocx === 'kosong' && hasDocx) return false;
+
+        const hasPdf = d.pdf && d.pdf !== '-';
+        if (colNPdf === 'ada' && !hasPdf) return false;
+        if (colNPdf === 'kosong' && hasPdf) return false;
+
+        return true;
       });
 
+      if (sortState.Naskah.field) {
+        const f = sortState.Naskah.field;
+        const dir = sortState.Naskah.asc ? 1 : -1;
+        filteredNaskahList.sort((a, b) => String(a[f] || '').localeCompare(String(b[f] || ''), 'id', { numeric: true }) * dir);
+      }
+
       const tbNaskah = document.getElementById('tableBodyNaskah');
-      tbNaskah.innerHTML = filteredNaskah.length === 0 
-        ? '<tr><td colspan="9" class="text-center text-muted py-3">Tidak ada data naskah yang sesuai.</td></tr>'
-        : filteredNaskah.map((d, idx) => `
+      tbNaskah.innerHTML = filteredNaskahList.length === 0 
+        ? '<tr><td colspan="10" class="text-center text-muted py-3">Tidak ada data naskah yang sesuai filter.</td></tr>'
+        : filteredNaskahList.map((d, idx) => `
           <tr>
+            <td class="text-center">
+              <input type="checkbox" class="form-check-input" ${selectedNaskahRows.has(d.rowIndex) ? 'checked' : ''} onchange="toggleRowSelect('Naskah', ${d.rowIndex}, this.checked)">
+            </td>
             <td class="text-center">${idx + 1}</td>
             <td>${d.waktu}</td>
             <td><strong>${d.nama1}</strong><br><small class="text-muted">NIS: ${d.nisn1}</small></td>
@@ -610,17 +816,50 @@
           </tr>
         `).join('');
 
-      const filteredPresentasi = rawPresentasiData.filter(d => {
-        const matchKelas = kelasFilter === "" || d.kelas === kelasFilter;
-        const text = `${d.nama} ${d.nisn} ${d.tempat}`.toLowerCase();
-        return matchKelas && text.includes(keyword);
+      // --- FILTER DATA PRESENTASI ---
+      const colPWaktu = document.getElementById('col_p_waktu').value.toLowerCase().trim();
+      const colPNama = document.getElementById('col_p_nama').value.toLowerCase().trim();
+      const colPNis = document.getElementById('col_p_nis').value.toLowerCase().trim();
+      const colPKelas = document.getElementById('col_p_kelas').value;
+      const colPTempat = document.getElementById('col_p_tempat').value.toLowerCase().trim();
+      const colPSlide = document.getElementById('col_p_slide').value;
+      const colPCanva = document.getElementById('col_p_canva').value;
+
+      filteredPresentasiList = rawPresentasiData.filter(d => {
+        const globalText = `${d.waktu} ${d.nama} ${d.nisn} ${d.kelas} ${d.tempat}`.toLowerCase();
+        if (globalKeyword && !globalText.includes(globalKeyword)) return false;
+
+        if (colPWaktu && !d.waktu.toLowerCase().includes(colPWaktu)) return false;
+        if (colPNama && !d.nama.toLowerCase().includes(colPNama)) return false;
+        if (colPNis && !String(d.nisn).toLowerCase().includes(colPNis)) return false;
+        if (colPKelas && d.kelas !== colPKelas) return false;
+        if (colPTempat && !d.tempat.toLowerCase().includes(colPTempat)) return false;
+
+        const hasSlide = d.slide && d.slide !== '-';
+        if (colPSlide === 'ada' && !hasSlide) return false;
+        if (colPSlide === 'kosong' && hasSlide) return false;
+
+        const hasCanva = d.canva && d.canva !== '-';
+        if (colPCanva === 'ada' && !hasCanva) return false;
+        if (colPCanva === 'kosong' && hasCanva) return false;
+
+        return true;
       });
 
+      if (sortState.Presentasi.field) {
+        const f = sortState.Presentasi.field;
+        const dir = sortState.Presentasi.asc ? 1 : -1;
+        filteredPresentasiList.sort((a, b) => String(a[f] || '').localeCompare(String(b[f] || ''), 'id', { numeric: true }) * dir);
+      }
+
       const tbPresentasi = document.getElementById('tableBodyPresentasi');
-      tbPresentasi.innerHTML = filteredPresentasi.length === 0 
-        ? '<tr><td colspan="9" class="text-center text-muted py-3">Tidak ada data presentasi yang sesuai.</td></tr>'
-        : filteredPresentasi.map((d, idx) => `
+      tbPresentasi.innerHTML = filteredPresentasiList.length === 0 
+        ? '<tr><td colspan="10" class="text-center text-muted py-3">Tidak ada data presentasi yang sesuai filter.</td></tr>'
+        : filteredPresentasiList.map((d, idx) => `
           <tr>
+            <td class="text-center">
+              <input type="checkbox" class="form-check-input" ${selectedPresentasiRows.has(d.rowIndex) ? 'checked' : ''} onchange="toggleRowSelect('Presentasi', ${d.rowIndex}, this.checked)">
+            </td>
             <td class="text-center">${idx + 1}</td>
             <td>${d.waktu}</td>
             <td><strong>${d.nama}</strong></td>
@@ -635,6 +874,212 @@
             </td>
           </tr>
         `).join('');
+
+      syncHeaderCheckboxes();
+      updateDownloadToolbar();
+    }
+
+    // ==========================================
+    // CHECKBOX SELECTION & DOWNLOAD MASSAL (.ZIP)
+    // ==========================================
+    function toggleRowSelect(jenis, rowIndex, isChecked) {
+      const targetSet = jenis === 'Naskah' ? selectedNaskahRows : selectedPresentasiRows;
+      if (isChecked) {
+        targetSet.add(rowIndex);
+      } else {
+        targetSet.delete(rowIndex);
+      }
+      syncHeaderCheckboxes();
+      updateDownloadToolbar();
+    }
+
+    function toggleSelectAll(jenis, isChecked) {
+      const targetSet = jenis === 'Naskah' ? selectedNaskahRows : selectedPresentasiRows;
+      const visibleList = jenis === 'Naskah' ? filteredNaskahList : filteredPresentasiList;
+
+      visibleList.forEach(item => {
+        if (isChecked) {
+          targetSet.add(item.rowIndex);
+        } else {
+          targetSet.delete(item.rowIndex);
+        }
+      });
+      filterTables();
+    }
+
+    function clearSelection() {
+      if (activeTab === 'tabNaskah') {
+        selectedNaskahRows.clear();
+      } else {
+        selectedPresentasiRows.clear();
+      }
+      filterTables();
+    }
+
+    function syncHeaderCheckboxes() {
+      const checkAllN = document.getElementById('checkAllNaskah');
+      if (checkAllN) {
+        checkAllN.checked = filteredNaskahList.length > 0 && filteredNaskahList.every(d => selectedNaskahRows.has(d.rowIndex));
+      }
+      const checkAllP = document.getElementById('checkAllPresentasi');
+      if (checkAllP) {
+        checkAllP.checked = filteredPresentasiList.length > 0 && filteredPresentasiList.every(d => selectedPresentasiRows.has(d.rowIndex));
+      }
+    }
+
+    function updateDownloadToolbar() {
+      const isNaskah = activeTab === 'tabNaskah';
+      const selectedCount = isNaskah ? selectedNaskahRows.size : selectedPresentasiRows.size;
+      const totalVisibleCount = isNaskah ? filteredNaskahList.length : filteredPresentasiList.length;
+
+      document.getElementById('selectedCountBadge').innerText = `${selectedCount} data ditandai`;
+      document.getElementById('btnClearSelection').style.display = selectedCount > 0 ? 'inline-block' : 'none';
+
+      const btnSel = document.getElementById('btnDownloadSelected');
+      btnSel.innerText = `Download Terpilih (${selectedCount})`;
+      btnSel.disabled = selectedCount === 0;
+
+      const btnAll = document.getElementById('btnDownloadAll');
+      btnAll.innerText = `Download Semua File (${totalVisibleCount})`;
+      btnAll.disabled = totalVisibleCount === 0;
+    }
+
+    function getUniqueZipName(usedNamesSet, rawFileName) {
+      if (!usedNamesSet.has(rawFileName)) {
+        usedNamesSet.add(rawFileName);
+        return rawFileName;
+      }
+      const dotIdx = rawFileName.lastIndexOf('.');
+      const base = dotIdx !== -1 ? rawFileName.substring(0, dotIdx) : rawFileName;
+      const ext = dotIdx !== -1 ? rawFileName.substring(dotIdx) : '';
+      let counter = 2;
+      let candidate = `${base} (${counter})${ext}`;
+      while (usedNamesSet.has(candidate)) {
+        counter++;
+        candidate = `${base} (${counter})${ext}`;
+      }
+      usedNamesSet.add(candidate);
+      return candidate;
+    }
+
+    async function downloadZipFiles(mode) {
+      const isNaskah = activeTab === 'tabNaskah';
+      let targetRows = [];
+
+      if (isNaskah) {
+        targetRows = mode === 'selected'
+          ? rawNaskahData.filter(d => selectedNaskahRows.has(d.rowIndex))
+          : filteredNaskahList;
+      } else {
+        targetRows = mode === 'selected'
+          ? rawPresentasiData.filter(d => selectedPresentasiRows.has(d.rowIndex))
+          : filteredPresentasiList;
+      }
+
+      if (targetRows.length === 0) {
+        alert("Tidak ada data yang dipilih untuk diunduh.");
+        return;
+      }
+
+      // Kumpulkan daftar URL file dan/atau link Canva
+      const fileTasks = [];
+      const canvaLinks = [];
+
+      if (isNaskah) {
+        targetRows.forEach(d => {
+          if (d.docx && d.docx !== '-') fileTasks.push({ url: d.docx, label: `${d.nama1} (DOCX)` });
+          if (d.pdf && d.pdf !== '-') fileTasks.push({ url: d.pdf, label: `${d.nama1} (PDF)` });
+        });
+      } else {
+        targetRows.forEach(d => {
+          if (d.slide && d.slide !== '-') fileTasks.push({ url: d.slide, label: `${d.nama} (Slide)` });
+          if (d.canva && d.canva !== '-') {
+            canvaLinks.push(`- ${d.nama} (NIS: ${d.nisn} | ${d.kelas} | ${d.tempat}): ${d.canva}`);
+          }
+        });
+      }
+
+      if (fileTasks.length === 0 && canvaLinks.length === 0) {
+        alert("Data yang dipilih tidak memiliki file maupun link untuk diunduh.");
+        return;
+      }
+
+      const btnSel = document.getElementById('btnDownloadSelected');
+      const btnAll = document.getElementById('btnDownloadAll');
+      const progressBox = document.getElementById('zipProgressBox');
+      const progressText = document.getElementById('zipProgressText');
+      const progressPercent = document.getElementById('zipProgressPercent');
+      const progressBar = document.getElementById('zipProgressBar');
+
+      btnSel.disabled = true;
+      btnAll.disabled = true;
+      progressBox.style.display = 'block';
+      progressBar.style.width = '5%';
+      progressPercent.innerText = '5%';
+
+      const zip = new JSZip();
+      const usedNames = new Set();
+      let successCount = 0;
+
+      for (let i = 0; i < fileTasks.length; i++) {
+        const task = fileTasks[i];
+        const pct = Math.round(((i + 1) / (fileTasks.length + 1)) * 90);
+        progressText.innerText = `Mengambil file ${i + 1} dari ${fileTasks.length}: ${task.label}...`;
+        progressPercent.innerText = `${pct}%`;
+        progressBar.style.width = `${pct}%`;
+
+        const res = await sendDataToAPI({
+          action: "getFileBase64",
+          password: currentAdminPass,
+          url: task.url
+        });
+
+        if (res.status === "Sukses" && res.base64) {
+          const uniqueName = getUniqueZipName(usedNames, res.fileName);
+          zip.file(uniqueName, res.base64, { base64: true });
+          successCount++;
+        }
+      }
+
+      if (canvaLinks.length > 0) {
+        const txtContent = "DAFTAR LINK CANVA SLIDE PRESENTASI PKL 12 DKV\n==================================================\n\n" + canvaLinks.join("\n");
+        zip.file("Daftar_Link_Canva.txt", txtContent);
+      }
+
+      if (successCount === 0 && canvaLinks.length === 0) {
+        progressBox.style.display = 'none';
+        updateDownloadToolbar();
+        alert("Gagal mengunduh file dari server.");
+        return;
+      }
+
+      progressText.innerText = "Membungkus file ke dalam arsip ZIP...";
+      progressPercent.innerText = "95%";
+      progressBar.style.width = "95%";
+
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const dateStamp = new Date().toISOString().slice(0, 10);
+      const prefix = isNaskah ? "Naskah_Laporan_PKL" : "Slide_Presentasi_PKL";
+      const suffix = mode === 'selected' ? `Terpilih_${targetRows.length}Data` : `Semua_${targetRows.length}Data`;
+      const zipFileName = `${prefix}_${suffix}_${dateStamp}.zip`;
+
+      const downloadUrl = URL.createObjectURL(zipBlob);
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = zipFileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(downloadUrl);
+
+      progressText.innerText = `Selesai! Arsip ${zipFileName} berhasil diunduh.`;
+      progressPercent.innerText = "100%";
+      progressBar.style.width = "100%";
+
+      setTimeout(() => {
+        progressBox.style.display = 'none';
+        updateDownloadToolbar();
+      }, 3000);
     }
 
     // ==========================================
@@ -823,7 +1268,7 @@
     }
 
     async function executeDelete() {
-      const rowIndex = document.getElementById('delete_rowIndex').value;
+      const rowIndex = parseInt(document.getElementById('delete_rowIndex').value, 10);
       const btn = document.getElementById('btnConfirmDelete');
       const status = document.getElementById('statusDelete');
 
@@ -838,6 +1283,8 @@
       });
 
       if (res.status === 'Sukses') {
+        selectedNaskahRows.delete(rowIndex);
+        selectedPresentasiRows.delete(rowIndex);
         bootstrap.Modal.getInstance(document.getElementById('modalConfirmDelete')).hide();
         loadDashboardData();
       } else {
